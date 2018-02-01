@@ -17,6 +17,7 @@ package eu.elixir.ega.ebi.egafuse;
 
 import com.google.api.client.auth.oauth2.PasswordTokenRequest;
 import com.google.api.client.auth.oauth2.ClientCredentialsTokenRequest;
+import com.google.api.client.auth.oauth2.RefreshTokenRequest;
 import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.api.client.http.BasicAuthentication;
 import com.google.api.client.http.GenericUrl;
@@ -203,6 +204,7 @@ public class EgaFuse extends FuseStubFS {
         options.addOption("p", "password", true, "Specify Password.");
         options.addOption("m", "mount", true, "Specify Mount Directory.");
         options.addOption("t", "token", true, "Specify Access Token.");
+        options.addOption("rt", "refresh_token", true, "Specify Refresh Token.");
         options.addOption("fu", "fileuser", true, "Specify File containing Username/Password");
         options.addOption("ft", "filetoken", true, "Specify File containing Access Token");
         options.addOption("g", "gridfuse", false, "Starts in GridFTP mode");
@@ -249,6 +251,9 @@ public class EgaFuse extends FuseStubFS {
             }
             if (cmd.hasOption("t")) {       // ACCESS TOKEN specified
                 accessToken = cmd.getOptionValue("t");
+            }
+            if (cmd.hasOption("rt")) {       // REFRESH TOKEN specified
+                refreshToken = cmd.getOptionValue("rt");
             }
             try {
                 if (cmd.hasOption("fu")) {  // USERNAME/PASSWORD FILE soecified
@@ -337,6 +342,9 @@ public class EgaFuse extends FuseStubFS {
       
         if (scanner.hasNextLine()) {
             accessToken = scanner.nextLine();
+            if (scanner.hasNextLine()) {
+                refreshToken = scanner.nextLine();
+            }
         } else {
             System.out.println("Access Token not Specified in File " + filepath);
             System.exit(1);
@@ -380,6 +388,24 @@ public class EgaFuse extends FuseStubFS {
             ).execute(); 
         
         return response;
+    }
+    public static void refreshAuthorize() throws Exception {
+        
+        TokenResponse response = 
+            new RefreshTokenRequest(HTTP_TRANSPORT, 
+                                   JSON_FACTORY, 
+                                   new GenericUrl(TOKEN_SERVER_URL), 
+                                   refreshToken)
+                .setGrantType("refresh_token")
+                .setClientAuthentication( 
+                    new BasicAuthentication(aaiConfig.get("userId").trim(), 
+                            aaiConfig.get("userSecret").trim())
+            ).execute(); 
+        
+            accessToken = response.getAccessToken();
+            refreshToken = response.getRefreshToken();
+
+        return;
     }
 
     private static TokenResponse authorizeApp() throws Exception {

@@ -20,6 +20,7 @@ import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -374,6 +375,9 @@ import okhttp3.OkHttpClient;
             return true;
           }
         });
+        
+        builder.connectTimeout(25000, TimeUnit.MILLISECONDS);
+        builder.readTimeout(25000, TimeUnit.MILLISECONDS);
 
         OkHttpClient okHttpClient = builder.build();
         return okHttpClient;

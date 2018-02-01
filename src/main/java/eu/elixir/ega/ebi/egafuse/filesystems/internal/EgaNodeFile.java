@@ -169,7 +169,12 @@ public class EgaNodeFile extends EgaApiFile {
 
    private byte[] populateCache(int page_number) {
 	System.out.println("populateCache(): page_number: " + page_number);
-        int bytesToRead = PAGE_SIZE;
+        long endC = page_number*PAGE_SIZE+PAGE_SIZE;
+System.out.println("populateCache() endC: " + endC);
+        int toRead = (int) (endC>theFile.getFileSize()?(theFile.getFileSize()-(page_number*PAGE_SIZE)):PAGE_SIZE);
+        int bytesToRead = toRead;
+System.out.println("populateCache() toRead: " + toRead);
+        //int bytesToRead = PAGE_SIZE;
 	long offset = page_number * PAGE_SIZE;
         // Prepare buffer to read from file
         byte[] bytesRead = new byte[bytesToRead];
@@ -184,7 +189,7 @@ public class EgaNodeFile extends EgaApiFile {
                 
                 Request datasetRequest = new Request.Builder()
                     .url(url)
-                    .addHeader("Authorization", "Bearer " + getAccessToken())
+                    .addHeader("Authorization", "Basic " + getBasicCode())
                     .build();
 
                 // Execute the request and retrieve the response.

@@ -17,14 +17,16 @@ package eu.elixir.ega.ebi.egafuse.filesystems.internal;
 
 import com.squareup.moshi.Moshi;
 import com.google.common.cache.*;
+import eu.elixir.ega.ebi.egafuse.EgaFuse;
 
 import eu.elixir.ega.ebi.egafuse.dto.EgaFileDto;
 import eu.elixir.ega.ebi.egafuse.filesystems.EgaApiDirectory;
 import eu.elixir.ega.ebi.egafuse.filesystems.EgaApiFile;
 import java.io.ByteArrayOutputStream;
-
 import java.io.IOException;
+
 import java.io.InputStream;
+import java.net.SocketTimeoutException;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -141,14 +143,17 @@ public class EgaRemoteFile extends EgaApiFile {
 	return this.cache.get(page_number);
    }
 
-   private byte[] populateCache(int page_number) {
+   private byte[] populateCache(int page_number) throws IOException {
 	System.out.println("populateCache(): page_number: " + page_number);
-        int bytesToRead = PAGE_SIZE;
+        long endC = page_number*PAGE_SIZE+PAGE_SIZE;
+        int toRead = (int) (endC>theFile.getFileSize()-16?(theFile.getFileSize()-16-(page_number*PAGE_SIZE)):PAGE_SIZE);
+        int bytesToRead = toRead;
+        //int bytesToRead = PAGE_SIZE;
 	long offset = page_number * PAGE_SIZE;
         // Prepare buffer to read from file
         byte[] bytesRead = new byte[bytesToRead];
 
-            synchronized (this) {
+        synchronized (this) {
 
             try {
                 String format = "plain";
@@ -158,13 +163,33 @@ public class EgaRemoteFile extends EgaApiFile {
                         "&startCoordinate=" + offset + 
                         "&endCoordinate=" + (offset+bytesToRead);
                 System.out.println(url);
-                Request datasetRequest = new Request.Builder()
+                Request fileRequest = new Request.Builder()
                     .url(url)
                     .addHeader("Authorization", "Bearer " + getAccessToken())
                     .build();
 
-                // Execute the request and retrieve the response.
-                Response response = client.newCall(datasetRequest).execute();
+                // Execute the request and retrieve the response (1 re-try)
+                Response response = null;
+                try {
+                    response = client.newCall(fileRequest).execute();
+                    if (response.code()==500) { // Expired Token - Try Refresh
+                        EgaFuse.refreshAuthorize();
+
+                        fileRequest = new Request.Builder()
+                        .url(url)
+                        .addHeader("Authorization", "Bearer " + getAccessToken())
+                        .build();
+
+                        response = client.newCall(fileRequest).execute();
+                    } else if (!response.isSuccessful()) { // error response - re-try one time
+                        Thread.sleep(500);
+                        response = client.newCall(fileRequest).execute();
+                    } 
+                } catch (SocketTimeoutException ex) {
+                    Thread.sleep(500);
+                    try {response = client.newCall(fileRequest).execute();} catch (SocketTimeoutException ex1) {return null;}
+                }
+                
                 ResponseBody body = response.body();
                 
                 InputStream byteStream = response.body().byteStream();
@@ -178,8 +203,9 @@ public class EgaRemoteFile extends EgaApiFile {
 
                 byte[] result = bao.toByteArray();
                 bytesRead = Arrays.copyOf(result, bytesToRead);
-            } catch (IOException ex) {
+            } catch (Exception ex) {
                 Logger.getLogger(EgaRemoteFile.class.getName()).log(Level.SEVERE, null, ex);
+                throw new IOException();
             }
 
         }

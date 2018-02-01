@@ -15,6 +15,7 @@
  */
 package eu.elixir.ega.ebi.egafuse.filesystems.internal;
 
+import eu.elixir.ega.ebi.egafuse.EgaFuse;
 import eu.elixir.ega.ebi.egafuse.SSLUtilities;
 import eu.elixir.ega.ebi.egafuse.dto.EgaFileDto;
 import eu.elixir.ega.ebi.egafuse.filesystems.EgaApiDirectory;
@@ -60,18 +61,25 @@ public class EgaDatasetDirectory extends EgaApiDirectory {
         OkHttpClient client = SSLUtilities.getUnsafeOkHttpClient();
 
         // List all Datasets
-        Request datasetRequest = new Request.Builder()
-            .url(getBaseUrl() + "/metadata/datasets")
-            .addHeader("Authorization", "Bearer " + getAccessToken())
-            .build();
-        
         try {
+            Request datasetRequest = new Request.Builder()
+                .url(getBaseUrl() + "/metadata/datasets")
+                .addHeader("Authorization", "Bearer " + getAccessToken())
+                .build();
+        
             // Execute the request and retrieve the response.
             Response response = null;
-            int tryCount = 9;
+            int tryCount = 3;
             while (tryCount-->0 && (response == null || !response.isSuccessful())) {
                 try {
                     response = client.newCall(datasetRequest).execute();
+                    if (response.code()==500) { // Expired Token - Try Refresh
+                        EgaFuse.refreshAuthorize();
+                        datasetRequest = new Request.Builder()
+                            .url(getBaseUrl() + "/metadata/datasets")
+                            .addHeader("Authorization", "Bearer " + getAccessToken())
+                            .build();
+                    }
                 } catch (Exception ex) {}
             }
             ResponseBody body = response.body();
@@ -108,10 +116,17 @@ public class EgaDatasetDirectory extends EgaApiDirectory {
         try {
             // Add List all Files for this Dataset
             Response fileResponse = null;
-            int tryCount = 9;
+            int tryCount = 3;
             while (tryCount-->0 && (fileResponse == null || !fileResponse.isSuccessful())) {
                 try {
                     fileResponse = client.newCall(fileRequest).execute();
+                    if (fileResponse.code()==500) { // Expired Token - Try Refresh
+                        EgaFuse.refreshAuthorize();
+                        fileRequest = new Request.Builder()
+                            .url(getBaseUrl() + "/metadata/datasets")
+                            .addHeader("Authorization", "Bearer " + getAccessToken())
+                            .build();
+                    }
                 } catch (Exception ex) {}
             }
             ResponseBody fileBody = fileResponse.body();

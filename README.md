@@ -35,6 +35,21 @@ Running 'ls' or 'll' will populate the directory, otherwise the Datasets directo
 
 The same procedure then applies to Dataset directories. Change into a dataset, then run 'ls' or 'll' to populate the directory. Now all files listed in the directory can be used like norman file system files.
 
+## Starting the FUSE layer with Refresh Tokens
+
+OAuth2 Bearer tokens have a validity of 1 hour. For tasks lasting longer than one hour a refresh token can be specified; in this case a config file (e.g. config.ini) must also be provided with specifications on how to contact the AAI. The config file must contain these entries:
+
+```
+userId:{AAI client ID}
+userSecret:{AAI client Secret}
+```
+
+The FUSE layer is then started as:
+
+```
+java -jar EgaFUSE-1.0-SNAPSHOT.jar -t {bearer token} -rt {refresh token} -m {mount dir} -f config.ini
+```
+
 ## License
 
 This project is licensed under the Apache 2.0 License - see the [LICENSE.md](LICENSE.md) file for details
