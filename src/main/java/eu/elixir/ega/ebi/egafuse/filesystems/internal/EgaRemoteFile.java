@@ -144,7 +144,7 @@ public class EgaRemoteFile extends EgaApiFile {
    }
 
    private byte[] populateCache(int page_number) throws IOException {
-	System.out.println("populateCache(): page_number: " + page_number);
+//	System.out.println("populateCache(): page_number: " + page_number);
         long endC = page_number*PAGE_SIZE+PAGE_SIZE;
         int toRead = (int) (endC>theFile.getFileSize()-16?(theFile.getFileSize()-16-(page_number*PAGE_SIZE)):PAGE_SIZE);
         int bytesToRead = toRead;
@@ -153,6 +153,11 @@ public class EgaRemoteFile extends EgaApiFile {
         // Prepare buffer to read from file
         byte[] bytesRead = new byte[bytesToRead];
 
+	System.out.println("populateCache(): page_number: " + page_number + "     " +
+                "/files/" + theFile.getFileId() + 
+                        "?destinationFormat=plain" + 
+                        "&startCoordinate=" + offset + 
+                        "&endCoordinate=" + (offset+bytesToRead));
         synchronized (this) {
 
             try {
@@ -193,12 +198,14 @@ public class EgaRemoteFile extends EgaApiFile {
                 ResponseBody body = response.body();
                 
                 InputStream byteStream = response.body().byteStream();
-                int bytesRead_ = 0;
+                int bytesRead_ = 0, bytesReadCnt_ = 0;
                 byte[] buff = new byte[8000];
                 ByteArrayOutputStream bao = new ByteArrayOutputStream();
 
-                while((bytesRead_ = byteStream.read(buff)) != -1) {
+                while( ((bytesRead_ = byteStream.read(buff)) != -1) &&
+                        bytesReadCnt_ < bytesToRead) {
                    bao.write(buff, 0, bytesRead_);
+                   bytesReadCnt_ += bytesRead_;
                 }
 
                 byte[] result = bao.toByteArray();
