@@ -52,7 +52,7 @@ public class EgaRemoteFile extends EgaApiFile {
    
     private LoadingCache<Integer, byte[]> cache;
 
-    private static final int PAGE_SIZE = 512*1024;
+    private static final long PAGE_SIZE = 512*1024;
     private static final int NUM_PAGES = 22;
  
     public EgaRemoteFile(String name, EgaApiDirectory parent) {
@@ -146,18 +146,18 @@ public class EgaRemoteFile extends EgaApiFile {
    private byte[] populateCache(int page_number) throws IOException {
 //	System.out.println("populateCache(): page_number: " + page_number);
         long endC = page_number*PAGE_SIZE+PAGE_SIZE;
-        int toRead = (int) (endC>theFile.getFileSize()-16?(theFile.getFileSize()-16-(page_number*PAGE_SIZE)):PAGE_SIZE);
-        int bytesToRead = toRead;
+        long toRead = (endC>theFile.getFileSize()-16?(theFile.getFileSize()-16-(page_number*PAGE_SIZE)):PAGE_SIZE);
+        long bytesToRead = toRead;
         //int bytesToRead = PAGE_SIZE;
 	long offset = page_number * PAGE_SIZE;
         // Prepare buffer to read from file
-        byte[] bytesRead = new byte[bytesToRead];
+        byte[] bytesRead = new byte[(int)bytesToRead];
 
 	System.out.println("populateCache(): page_number: " + page_number + "     " +
                 "/files/" + theFile.getFileId() + 
                         "?destinationFormat=plain" + 
                         "&startCoordinate=" + offset + 
-                        "&endCoordinate=" + (offset+bytesToRead));
+                        "&endCoordinate=" + (offset+bytesToRead) + "      " + bytesToRead);
         synchronized (this) {
 
             try {
@@ -209,7 +209,7 @@ public class EgaRemoteFile extends EgaApiFile {
                 }
 
                 byte[] result = bao.toByteArray();
-                bytesRead = Arrays.copyOf(result, bytesToRead);
+                bytesRead = Arrays.copyOf(result, (int)bytesToRead);
                 
                 response.close();
                 bao.close();
