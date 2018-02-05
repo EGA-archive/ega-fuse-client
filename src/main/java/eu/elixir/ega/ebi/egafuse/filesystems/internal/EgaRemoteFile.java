@@ -162,7 +162,7 @@ public class EgaRemoteFile extends EgaApiFile {
                         "?destinationFormat=" + format + 
                         "&startCoordinate=" + offset + 
                         "&endCoordinate=" + (offset+bytesToRead);
-                System.out.println(url);
+                //System.out.println(url);
                 Request fileRequest = new Request.Builder()
                     .url(url)
                     .addHeader("Authorization", "Bearer " + getAccessToken())
@@ -203,6 +203,10 @@ public class EgaRemoteFile extends EgaApiFile {
 
                 byte[] result = bao.toByteArray();
                 bytesRead = Arrays.copyOf(result, bytesToRead);
+                
+                response.close();
+                bao.close();
+                bao = null;
             } catch (Exception ex) {
                 Logger.getLogger(EgaRemoteFile.class.getName()).log(Level.SEVERE, null, ex);
                 throw new IOException();
