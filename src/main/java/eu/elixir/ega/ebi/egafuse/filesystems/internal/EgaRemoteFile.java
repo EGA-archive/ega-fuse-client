@@ -52,8 +52,8 @@ public class EgaRemoteFile extends EgaApiFile {
    
     private LoadingCache<Integer, byte[]> cache;
 
-    private static final long PAGE_SIZE = 512*1024;
-    private static final int NUM_PAGES = 22;
+    private static final long PAGE_SIZE = 1024L*1024L*10L;
+    private static final int NUM_PAGES = 7;
  
     public EgaRemoteFile(String name, EgaApiDirectory parent) {
         super(name, parent);
@@ -62,7 +62,7 @@ public class EgaRemoteFile extends EgaApiFile {
 	// Init cache 
 	this.cache = CacheBuilder.newBuilder()
             .maximumSize(NUM_PAGES)
-            .concurrencyLevel(NUM_PAGES)
+            .concurrencyLevel(NUM_PAGES*2)
             .build(
                 new CacheLoader<Integer, byte[]>() {
                     public byte[] load(Integer page) throws Exception {
@@ -99,11 +99,12 @@ public class EgaRemoteFile extends EgaApiFile {
     public int read(Pointer buffer, long size, long offset) {
         long fsize = (type.equalsIgnoreCase("CIP"))?this.theFile.getFileSize()-16:this.theFile.getFileSize();
         int bytesToRead = (int) Math.min(fsize - offset, size);
-
+        if ( (offset >= fsize) || (bytesToRead <= 0) ) return -1;
+        
         int cachePage = (int)(offset / PAGE_SIZE); // 0,1,2,... 
 
-        System.out.println("read() offset: " + offset + " size: " + size);
-        System.out.println("read() fsize: " + fsize + " bytesToRead: " + bytesToRead);
+        System.out.println("read() fsize: " + fsize + " offset: " + offset + " size: " + size);
+        //System.out.println("read() fsize: " + fsize + " bytesToRead: " + bytesToRead);
 
         try {
             byte[] page = this.get(cachePage);
@@ -145,11 +146,11 @@ public class EgaRemoteFile extends EgaApiFile {
 
    private byte[] populateCache(int page_number) throws IOException {
 //	System.out.println("populateCache(): page_number: " + page_number);
-        long endC = page_number*PAGE_SIZE+PAGE_SIZE;
+        long endC = ((long)page_number)*PAGE_SIZE+PAGE_SIZE;
         long toRead = (endC>theFile.getFileSize()-16?(theFile.getFileSize()-16-(page_number*PAGE_SIZE)):PAGE_SIZE);
         long bytesToRead = toRead;
         //int bytesToRead = PAGE_SIZE;
-	long offset = page_number * PAGE_SIZE;
+	long offset = ((long)page_number) * PAGE_SIZE;
         // Prepare buffer to read from file
         byte[] bytesRead = new byte[(int)bytesToRead];
 
