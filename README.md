@@ -16,6 +16,10 @@ mvn package
 
 This will produce the FUSE later jar file in the /target directory.
 
+### Mac Specific Installation:
+
+This FUSE layer has been tested on Mac OS as well. You must install Fuse for Mac / Osxfuse: https://osxfuse.github.io/ 
+
 ## Starting the FUSE layer
 
 The FUSE layer requires at minimum a valid EGA OAuth2 Bearer Token to run; specifying a mount directory is recommened (default is /tmp/mnt). The mount directoty must be an existing and empty directory:
