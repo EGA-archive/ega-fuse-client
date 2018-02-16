@@ -89,9 +89,8 @@ public class EgaFuse extends FuseStubFS {
     private static String mountDir="/tmp/mnt"; // Required: mount directory
     private static String accessToken; // If missing: obtain; requires aaiUrl
     private static String refreshToken; // Test
-    //private static String baseUrl = "http://data.epouta.lega.csc.fi:8686/elixir/access"; // API URL. Deprecated
-    private static String baseUrl = "https://ega.ebi.ac.uk:8051/elixir/data"; // API URL. Required
-    //private static String baseFile = "http://data.epouta.lega.csc.fi:8686/elixir/data"; // File URL. Required    
+    private static String baseUrl = "https://ega.ebi.ac.uk:8051/elixir/data"; // API URL. Required 
+            // for CSC: "http://data.epouta.lega.csc.fi:8686/elixir/data"; -- Specify via option upon start
     private static String cegaUrl = "https://ega.ebi.ac.uk:8051/elixir/central"; // API URL. Required
     private static Options options = new Options();
 
