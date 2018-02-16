@@ -209,6 +209,7 @@ public class EgaFuse extends FuseStubFS {
         options.addOption("ft", "filetoken", true, "Specify File containing Access Token");
         options.addOption("g", "gridfuse", false, "Starts in GridFTP mode");
         options.addOption("gf", "gridfile", true, "Account Mapping File");
+        options.addOption("url", "baseeurl", true, "Alternate FUSE Base URL");
         options.addOption("h", "help", false, "Display Help.");
  
     }
@@ -224,6 +225,9 @@ public class EgaFuse extends FuseStubFS {
             if (cmd.hasOption("h")) {       // HELP
                 help();
                 System.exit(0);
+            }
+            if (cmd.hasOption("url")) {     // Provide a custom FUSE URL
+                baseUrl = cmd.getOptionValue("url");
             }
             if (cmd.hasOption("f")) {       // USERNAME specified
                 String path = cmd.getOptionValue("f");
