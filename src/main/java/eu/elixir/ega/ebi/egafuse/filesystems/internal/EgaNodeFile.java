@@ -55,8 +55,8 @@ public class EgaNodeFile extends EgaApiFile {
     
     private LoadingCache<Integer, byte[]> cache;
 
-    private static final int PAGE_SIZE = 512*1024;
-    private static final int NUM_PAGES = 22;
+    private static final int PAGE_SIZE = 1024*1024*10;
+    private static final int NUM_PAGES = 8;
  
     public EgaNodeFile(String name, EgaApiDirectory parent) {
         super(name, parent);
@@ -100,7 +100,7 @@ public class EgaNodeFile extends EgaApiFile {
             .maximumSize(NUM_PAGES)
             .concurrencyLevel(NUM_PAGES)
             .build(
-                new CacheLoader<Integer, byte[]>() {
+                new CacheLoader <Integer, byte[]>() {
                     public byte[] load(Integer page) throws Exception {
                         return populateCache(page);
                     }

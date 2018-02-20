@@ -20,7 +20,6 @@ import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
 import eu.elixir.ega.ebi.egafuse.EgaFuse;
 import eu.elixir.ega.ebi.egafuse.dto.EgaFileDto;
-import eu.elixir.ega.ebi.egafuse.dto.EgaTicketDto;
 import java.util.ArrayList;
 import java.util.List;
 import jnr.ffi.Pointer;
@@ -36,7 +35,6 @@ public class EgaApiDirectory extends EgaApiPath {
     protected final Moshi MOSHI = new Moshi.Builder().build();
     protected final JsonAdapter<List<String>> STRING_JSON_ADAPTER = MOSHI.adapter(Types.newParameterizedType(List.class, String.class));
     protected final JsonAdapter<List<EgaFileDto>> FILE_JSON_ADAPTER = MOSHI.adapter(Types.newParameterizedType(List.class, EgaFileDto.class));
-    protected final JsonAdapter<List<EgaTicketDto>> TICKET_JSON_ADAPTER = MOSHI.adapter(Types.newParameterizedType(List.class, EgaTicketDto.class));
     
     protected List<EgaApiPath> contents = new ArrayList<>();    
     

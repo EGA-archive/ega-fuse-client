@@ -21,7 +21,11 @@ import eu.elixir.ega.ebi.egafuse.dto.EgaFileDto;
 import eu.elixir.ega.ebi.egafuse.filesystems.EgaApiDirectory;
 import eu.elixir.ega.ebi.egafuse.filesystems.EgaApiPath;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jnr.ffi.Pointer;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -62,11 +66,18 @@ public class EgaNodeDirectory extends EgaApiDirectory {
      * Obtain list of Datasets; 'Orgs' may access all datasets (any restrictions happen in Access)
      */
     private void getDatasets(String org) {
+        String plainOrg = org.substring(10);
+        String urlOrg = plainOrg;
+        try {
+            urlOrg = URLEncoder.encode(plainOrg, "UTF-8");
+        } catch (UnsupportedEncodingException ex) {}
+System.out.println("urlOrg: " + urlOrg);
+        
         OkHttpClient client = SSLUtilities.getUnsafeOkHttpClient();
 
         // List all Datasets
         Request datasetRequest = new Request.Builder()
-            .url(getCentralUrl() + "/app/datasets/" + org)
+            .url(getCentralUrl() + "/app/datasets/" + urlOrg)
             .addHeader("Authorization", "Basic " + getBasicCode())
             .build();
         

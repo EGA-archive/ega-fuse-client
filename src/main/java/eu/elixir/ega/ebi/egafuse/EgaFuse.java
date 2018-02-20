@@ -43,6 +43,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URLEncoder;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -81,7 +82,8 @@ import ru.serce.jnrfuse.struct.FuseFileInfo;
  */
 public class EgaFuse extends FuseStubFS {
     private static boolean grid = false;
-    //private static String basicCode;
+    private static String gridOrg = null;
+    private static String basicCode = null;
     
     // Specified by command line parameters
     private static GuardedString username; // Optional, if token is specified
@@ -160,7 +162,7 @@ public class EgaFuse extends FuseStubFS {
      * java -jar EgaFuse.jar -t {accesstoken} -m {mount dir}
      * java -jar EgaFuse.jar -ft {file containing accesstoken} -m {mount dir}
      * 
-     * java -jar EgaFuse.jar -g -m {mount dir} [-gf {mapping file path}]
+     * java -jar EgaFuse.jar -g {org} -m {mount dir} [-gf {mapping file path}]
      * 
      */
     public static void main(String[] args) {
@@ -206,9 +208,9 @@ public class EgaFuse extends FuseStubFS {
         options.addOption("rt", "refresh_token", true, "Specify Refresh Token.");
         options.addOption("fu", "fileuser", true, "Specify File containing Username/Password");
         options.addOption("ft", "filetoken", true, "Specify File containing Access Token");
-        options.addOption("g", "gridfuse", false, "Starts in GridFTP mode");
+        options.addOption("g", "gridfuse", true, "Starts in GridFTP mode; required: orgaization");
         options.addOption("gf", "gridfile", true, "Account Mapping File");
-        options.addOption("url", "baseeurl", true, "Alternate FUSE Base URL");
+        options.addOption("url", "baseurl", true, "Alternate FUSE Base URL");
         options.addOption("h", "help", false, "Display Help.");
  
     }
@@ -272,6 +274,8 @@ public class EgaFuse extends FuseStubFS {
             
             if (cmd.hasOption("g")) {       // Non-User Mode
                 grid = true;
+                gridOrg = cmd.getOptionValue("g");
+System.out.println("Grid Org: " + gridOrg);
                 try {
                     if (cmd.hasOption("gf")) {  // Mapping File Specified (only if -g)
                         getUserMapping(cmd.getOptionValue("gf"));
@@ -281,6 +285,11 @@ public class EgaFuse extends FuseStubFS {
                     System.out.println("Linux/EGA User Mapping Error (does the Linux user exist?): " + ex.getMessage());
                     System.exit(7);
                 }
+                
+//                basicCode = URLEncoder.encode(cmd.getOptionValue("u") + ":" + cmd.getOptionValue("p"));
+//System.out.println("basicCode: " + basicCode);
+                
+                /*  Replaced by Basic Auth - use username & password to get Basic Auth header
                 try { // always required
                     TokenResponse token = authorizeApp();
                     accessToken = token.getAccessToken();
@@ -289,6 +298,7 @@ public class EgaFuse extends FuseStubFS {
                     System.out.println("Grid Mode/Authentication Error: " + ex.getMessage());
                     System.exit(7);
                 }
+                */                
             }
             
 
@@ -410,7 +420,7 @@ public class EgaFuse extends FuseStubFS {
 
         return;
     }
-
+/*
     private static TokenResponse authorizeApp() throws Exception {
         Collection<String> scopes = new ArrayList<>();
         scopes.add(aaiConfig.get("fuseScope").trim());
@@ -430,7 +440,7 @@ public class EgaFuse extends FuseStubFS {
         
         return response;
     }
-    
+*/    
     public static String getBasicCode() {
         return aaiConfig.get("user").toString();
     }
@@ -447,6 +457,10 @@ public class EgaFuse extends FuseStubFS {
         return cegaUrl;
     }
     
+    /*
+     * Should be Replaced with specified Org
+     */
+    /*
     private void getOrgsNodes() {
         if (userMapping==null) { // If no mapping file is specified, use identity
             userMapping = new HashMap<>();
@@ -494,6 +508,12 @@ public class EgaFuse extends FuseStubFS {
         } catch (IOException ex) {
             System.out.println("Error getting Datasets: " + ex.toString());
         }        
+    }
+    */
+    private void getOrgsNodes() {
+        String plainOrg = "publicgpg_" + gridOrg;
+        EgaNodeDirectory egaNodeDirectory = new EgaNodeDirectory(plainOrg, rootDirectory);
+        rootDirectory.add(egaNodeDirectory);
     }
     
     private static void getConfig(String filepath) throws FileNotFoundException {
