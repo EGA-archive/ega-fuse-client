@@ -19,16 +19,15 @@ import eu.elixir.ega.ebi.egafuse.SSLUtilities;
 import okhttp3.OkHttpClient;
 
 /**
- *
  * @author asenf
  */
 public abstract class EgaApiFile extends EgaApiPath {
-    
+
     protected String type; // Source Encryption Type (CIP, GPG, SOURCE)
     protected String target = null; // Source Encryption Type (CIP, GPG, SOURCE)
 
     protected OkHttpClient client;
-    
+
     public EgaApiFile(String name, EgaApiDirectory parent) {
         super(name, parent);
     }
@@ -39,15 +38,15 @@ public abstract class EgaApiFile extends EgaApiPath {
     protected void setType() {
         if (name.toLowerCase().endsWith(".gpg")) {
             type = "GPG";
-            name = name.substring(0, name.length()-4);
+            name = name.substring(0, name.length() - 4);
         } else if (name.toLowerCase().endsWith(".cip")) {
             type = "CIP";
-            name = name.substring(0, name.length()-4);
+            name = name.substring(0, name.length() - 4);
         } else {
             type = "SOURCE";
         }
     }
-    
+
     // Access File - "Open"
     public int open() {
         client = SSLUtilities.getUnsafeOkHttpClient();
