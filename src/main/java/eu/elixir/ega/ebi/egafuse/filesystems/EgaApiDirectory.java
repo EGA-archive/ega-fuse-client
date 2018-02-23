@@ -20,24 +20,24 @@ import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
 import eu.elixir.ega.ebi.egafuse.EgaFuse;
 import eu.elixir.ega.ebi.egafuse.dto.EgaFileDto;
-import java.util.ArrayList;
-import java.util.List;
 import jnr.ffi.Pointer;
 import ru.serce.jnrfuse.FuseFillDir;
 import ru.serce.jnrfuse.struct.FileStat;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- *
  * @author asenf
  */
 public class EgaApiDirectory extends EgaApiPath {
-    
+
     protected final Moshi MOSHI = new Moshi.Builder().build();
     protected final JsonAdapter<List<String>> STRING_JSON_ADAPTER = MOSHI.adapter(Types.newParameterizedType(List.class, String.class));
     protected final JsonAdapter<List<EgaFileDto>> FILE_JSON_ADAPTER = MOSHI.adapter(Types.newParameterizedType(List.class, EgaFileDto.class));
-    
-    protected List<EgaApiPath> contents = new ArrayList<>();    
-    
+
+    protected List<EgaApiPath> contents = new ArrayList<>();
+
     public EgaApiDirectory(String name, EgaApiDirectory parent) {
         super(name, parent);
     }

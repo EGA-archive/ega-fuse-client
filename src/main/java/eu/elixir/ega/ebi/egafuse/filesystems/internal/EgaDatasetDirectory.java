@@ -20,8 +20,6 @@ import eu.elixir.ega.ebi.egafuse.SSLUtilities;
 import eu.elixir.ega.ebi.egafuse.dto.EgaFileDto;
 import eu.elixir.ega.ebi.egafuse.filesystems.EgaApiDirectory;
 import eu.elixir.ega.ebi.egafuse.filesystems.EgaApiPath;
-import java.io.IOException;
-import java.util.List;
 import jnr.ffi.Pointer;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -29,26 +27,28 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 import ru.serce.jnrfuse.FuseFillDir;
 
+import java.io.IOException;
+import java.util.List;
+
 /**
- *
  * @author asenf
  */
 public class EgaDatasetDirectory extends EgaApiDirectory {
-    
+
     public EgaDatasetDirectory(String name, EgaApiDirectory parent) {
         super(name, parent);
     }
 
     @Override
     public synchronized void read(Pointer buf, FuseFillDir filler) {
-        if (contents==null || contents.size() == 0) {
+        if (contents == null || contents.size() == 0) {
             if (name.equalsIgnoreCase("datasets")) {
                 getDatasets();
             } else {
                 getFiles();
             }
         }
-        
+
         for (EgaApiPath p : contents) {
             filler.apply(buf, p.getName(), null, 0);
         }
@@ -63,38 +63,39 @@ public class EgaDatasetDirectory extends EgaApiDirectory {
         // List all Datasets
         try {
             Request datasetRequest = new Request.Builder()
-                .url(getBaseUrl() + "/metadata/datasets")
-                .addHeader("Authorization", "Bearer " + getAccessToken())
-                .build();
-        
+                    .url(getBaseUrl() + "/metadata/datasets")
+                    .addHeader("Authorization", "Bearer " + getAccessToken())
+                    .build();
+
             // Execute the request and retrieve the response.
             Response response = null;
             int tryCount = 3;
-            while (tryCount-->0 && (response == null || !response.isSuccessful())) {
+            while (tryCount-- > 0 && (response == null || !response.isSuccessful())) {
                 try {
                     response = client.newCall(datasetRequest).execute();
-                    if (response.code()==500) { // Expired Token - Try Refresh
+                    if (response.code() == 500) { // Expired Token - Try Refresh
                         EgaFuse.refreshAuthorize();
                         datasetRequest = new Request.Builder()
-                            .url(getBaseUrl() + "/metadata/datasets")
-                            .addHeader("Authorization", "Bearer " + getAccessToken())
-                            .build();
+                                .url(getBaseUrl() + "/metadata/datasets")
+                                .addHeader("Authorization", "Bearer " + getAccessToken())
+                                .build();
                     }
-                } catch (Exception ex) {}
+                } catch (Exception ex) {
+                }
             }
             ResponseBody body = response.body();
             List<String> datasets = STRING_JSON_ADAPTER.fromJson(body.source());
             body.close();
             System.out.println(datasets.size() + " datasets found.");
-            
-            for (String dataset:datasets) {
+
+            for (String dataset : datasets) {
                 EgaDatasetDirectory egaDatasetDirectory = new EgaDatasetDirectory(dataset, this);
                 contents.add(egaDatasetDirectory);
-            }            
+            }
         } catch (IOException ex) {
             System.out.println("Error getting Datasets [EgaDatasetDirectory]: " + ex.toString());
         }
-        
+
     }
 
     /*
@@ -103,41 +104,42 @@ public class EgaDatasetDirectory extends EgaApiDirectory {
     private void getFiles() {
         String datasetId = name;
         if (datasetId.endsWith("/")) {
-            datasetId = datasetId.substring(0, datasetId.length()-1);
+            datasetId = datasetId.substring(0, datasetId.length() - 1);
         }
-        
+
         OkHttpClient client = SSLUtilities.getUnsafeOkHttpClient();
 
         Request fileRequest = new Request.Builder()
-            .url(getBaseUrl() + "/metadata/datasets/" + datasetId + "/files")
-            .addHeader("Authorization", "Bearer " + getAccessToken())
-            .build();
-        
+                .url(getBaseUrl() + "/metadata/datasets/" + datasetId + "/files")
+                .addHeader("Authorization", "Bearer " + getAccessToken())
+                .build();
+
         try {
             // Add List all Files for this Dataset
             Response fileResponse = null;
             int tryCount = 3;
-            while (tryCount-->0 && (fileResponse == null || !fileResponse.isSuccessful())) {
+            while (tryCount-- > 0 && (fileResponse == null || !fileResponse.isSuccessful())) {
                 try {
                     fileResponse = client.newCall(fileRequest).execute();
-                    if (fileResponse.code()==500) { // Expired Token - Try Refresh
+                    if (fileResponse.code() == 500) { // Expired Token - Try Refresh
                         EgaFuse.refreshAuthorize();
                         fileRequest = new Request.Builder()
-                            .url(getBaseUrl() + "/metadata/datasets")
-                            .addHeader("Authorization", "Bearer " + getAccessToken())
-                            .build();
+                                .url(getBaseUrl() + "/metadata/datasets")
+                                .addHeader("Authorization", "Bearer " + getAccessToken())
+                                .build();
                     }
-                } catch (Exception ex) {}
+                } catch (Exception ex) {
+                }
             }
             ResponseBody fileBody = fileResponse.body();
 
             List<EgaFileDto> files = FILE_JSON_ADAPTER.fromJson(fileBody.source());
-            fileBody.close();            
+            fileBody.close();
 
-            for (EgaFileDto file:files) {
+            for (EgaFileDto file : files) {
                 String filename = file.getFileName();
                 if (filename.contains("/")) {
-                    filename = filename.substring(filename.lastIndexOf("/")+1);
+                    filename = filename.substring(filename.lastIndexOf("/") + 1);
                 }
                 String fileUrl = getBaseUrl() + "/files/" + file.getFileId();
                 EgaRemoteFile newFile = new EgaRemoteFile(filename, this, file);
@@ -146,6 +148,6 @@ public class EgaDatasetDirectory extends EgaApiDirectory {
         } catch (IOException ex) {
             System.out.println("Error getting Files [EgaDatasetDirectory]: " + ex.toString());
         }
-        
+
     }
 }

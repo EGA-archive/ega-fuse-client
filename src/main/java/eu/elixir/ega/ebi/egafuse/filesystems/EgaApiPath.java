@@ -19,11 +19,10 @@ import eu.elixir.ega.ebi.egafuse.EgaFuse;
 import ru.serce.jnrfuse.struct.FileStat;
 
 /**
- *
  * @author asenf
  */
 public abstract class EgaApiPath {
-    
+
     protected String name;
     protected EgaApiDirectory parent;
 
@@ -35,7 +34,7 @@ public abstract class EgaApiPath {
         this.name = name;
         this.parent = parent;
     }
-    
+
     // Move to Request/Ticket
     //private synchronized void delete() {
     //    if (parent != null) {
@@ -66,10 +65,14 @@ public abstract class EgaApiPath {
     public String getName() {
         return this.name;
     }
-    
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getRootName() {
         try {
-            if (parent.getParent()==null) {
+            if (parent.getParent() == null) {
                 return name;
             } else {
                 return parent.getRootName();
@@ -78,33 +81,29 @@ public abstract class EgaApiPath {
             return "";
         }
     }
-    
+
     public EgaApiPath getParent() {
         return parent;
     }
-    
-    public String getAccessToken() {
-        return EgaFuse.getToken();
-    }
-    
-    public String getBasicCode() {
-        return EgaFuse.getBasicCode();
-    }
-    
-    public String getBaseUrl() {
-        return EgaFuse.getApiUrl();
-    }
-    
-    public String getCentralUrl() {
-        return EgaFuse.getCentralUrl();
-    }
-    
+
     public void setParent(EgaApiDirectory parent) {
         this.parent = parent;
     }
-    
-    public void setName(String name) {
-        this.name = name;
+
+    public String getAccessToken() {
+        return EgaFuse.getToken();
+    }
+
+    public String getBasicCode() {
+        return EgaFuse.getBasicCode();
+    }
+
+    public String getBaseUrl() {
+        return EgaFuse.getApiUrl();
+    }
+
+    public String getCentralUrl() {
+        return EgaFuse.getCentralUrl();
     }
 
     public synchronized void delete() {

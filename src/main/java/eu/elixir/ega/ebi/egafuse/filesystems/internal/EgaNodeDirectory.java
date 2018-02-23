@@ -20,12 +20,6 @@ import eu.elixir.ega.ebi.egafuse.SSLUtilities;
 import eu.elixir.ega.ebi.egafuse.dto.EgaFileDto;
 import eu.elixir.ega.ebi.egafuse.filesystems.EgaApiDirectory;
 import eu.elixir.ega.ebi.egafuse.filesystems.EgaApiPath;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import jnr.ffi.Pointer;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -33,22 +27,26 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 import ru.serce.jnrfuse.FuseFillDir;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.List;
+
 /**
- *
  * @author asenf
  */
 public class EgaNodeDirectory extends EgaApiDirectory {
-    
+
     private String orgName; // Username - mapped to File ReEncryption Format
-    
+
     public EgaNodeDirectory(String name, EgaApiDirectory parent) {
         super(name, parent);
         orgName = parent.getName();
     }
-        
+
     @Override
     public synchronized void read(Pointer buf, FuseFillDir filler) {
-        if (contents==null || contents.size() == 0) {
+        if (contents == null || contents.size() == 0) {
             String org = EgaFuse.getOrg(name);
             if (org.toLowerCase().contains("publicgpg_")) {
                 getDatasets(org);
@@ -56,7 +54,7 @@ public class EgaNodeDirectory extends EgaApiDirectory {
                 getFiles();
             }
         }
-        
+
         for (EgaApiPath p : contents) {
             filler.apply(buf, p.getName(), null, 0);
         }
@@ -70,72 +68,75 @@ public class EgaNodeDirectory extends EgaApiDirectory {
         String urlOrg = plainOrg;
         try {
             urlOrg = URLEncoder.encode(plainOrg, "UTF-8");
-        } catch (UnsupportedEncodingException ex) {}
-System.out.println("urlOrg: " + urlOrg);
-        
+        } catch (UnsupportedEncodingException ex) {
+        }
+        System.out.println("urlOrg: " + urlOrg);
+
         OkHttpClient client = SSLUtilities.getUnsafeOkHttpClient();
 
         // List all Datasets
         Request datasetRequest = new Request.Builder()
-            .url(getCentralUrl() + "/app/datasets/" + urlOrg)
-            .addHeader("Authorization", "Basic " + getBasicCode())
-            .build();
-        
+                .url(getCentralUrl() + "/app/datasets/" + urlOrg)
+                .addHeader("Authorization", "Basic " + getBasicCode())
+                .build();
+
         try {
             // Execute the request and retrieve the response.
             Response response = null;
             int tryCount = 9;
-            while (tryCount-->0 && (response == null || !response.isSuccessful())) {
+            while (tryCount-- > 0 && (response == null || !response.isSuccessful())) {
                 try {
                     response = client.newCall(datasetRequest).execute();
-                } catch (Exception ex) {}
+                } catch (Exception ex) {
+                }
             }
             ResponseBody body = response.body();
             List<String> datasets = STRING_JSON_ADAPTER.fromJson(body.source());
             body.close();
             System.out.println(datasets.size() + " datasets found.");
-            
-            for (String dataset:datasets) {
+
+            for (String dataset : datasets) {
                 EgaNodeDirectory egaNodeDirectory = new EgaNodeDirectory(dataset, this);
                 contents.add(egaNodeDirectory);
-            }            
+            }
         } catch (IOException ex) {
             System.out.println("Error getting Datasets [EgaNodeDirectory]: " + ex.toString());
         }
-        
+
     }
 
     private void getFiles() {
         String datasetId = name;
         if (datasetId.endsWith("/")) {
-            datasetId = datasetId.substring(0, datasetId.length()-1);
+            datasetId = datasetId.substring(0, datasetId.length() - 1);
         }
-        
+
         OkHttpClient client = SSLUtilities.getUnsafeOkHttpClient();
 
         Request fileRequest = new Request.Builder()
-            .url(getCentralUrl() + "/app/datasets/" + datasetId + "/files")
-            .addHeader("Authorization", "Basic " + getBasicCode())
-            .build();
-        
+                .url(getCentralUrl() + "/app/datasets/" + datasetId + "/files")
+                .addHeader("Authorization", "Basic " + getBasicCode())
+                .build();
+
         try {
             // Add List all Files for this Dataset
             Response fileResponse = null;
             int tryCount = 9;
-            while (tryCount-->0 && (fileResponse == null || !fileResponse.isSuccessful())) {
+            while (tryCount-- > 0 && (fileResponse == null || !fileResponse.isSuccessful())) {
                 try {
                     fileResponse = client.newCall(fileRequest).execute();
-                } catch (Exception ex) {}
+                } catch (Exception ex) {
+                }
             }
             ResponseBody fileBody = fileResponse.body();
 
             List<EgaFileDto> files = FILE_JSON_ADAPTER.fromJson(fileBody.source());
-            fileBody.close();            
+            fileBody.close();
 
-            for (EgaFileDto file:files) {
+            for (EgaFileDto file : files) {
                 String filename = file.getFileName();
                 if (filename.contains("/")) {
-                    filename = filename.substring(filename.lastIndexOf("/")+1);
+                    filename = filename.substring(filename.lastIndexOf("/") + 1);
                 }
                 String fileUrl = getBaseUrl() + "/files/" + file.getFileId();
                 EgaNodeFile newFile = new EgaNodeFile(filename, this, file);
@@ -144,9 +145,9 @@ System.out.println("urlOrg: " + urlOrg);
         } catch (IOException ex) {
             System.out.println("Error getting Files [EgaNodeDirectory]: " + ex.toString());
         }
-        
+
     }
-    
+
     public String getOrgName() {
         return orgName;
     }
