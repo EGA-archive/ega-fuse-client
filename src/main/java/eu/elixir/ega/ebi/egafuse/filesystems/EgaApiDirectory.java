@@ -15,17 +15,19 @@
  */
 package eu.elixir.ega.ebi.egafuse.filesystems;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
+
 import eu.elixir.ega.ebi.egafuse.EgaFuse;
 import eu.elixir.ega.ebi.egafuse.dto.EgaFileDto;
 import jnr.ffi.Pointer;
+import jnr.posix.util.Platform;
 import ru.serce.jnrfuse.FuseFillDir;
 import ru.serce.jnrfuse.struct.FileStat;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author asenf
@@ -83,8 +85,11 @@ public class EgaApiDirectory extends EgaApiPath {
 
     @Override
     public void getattr(FileStat stat) {
-        //stat.st_mode.set(FileStat.S_IFDIR | 0755);
-        stat.st_mode.set(FileStat.S_IFDIR | 0550);
+        if (Platform.IS_WINDOWS) {
+            stat.st_mode.set(FileStat.S_IFDIR | 0755);
+        } else {
+            stat.st_mode.set(FileStat.S_IFDIR | 0550);
+        }
         String name_ = getRootName();
         stat.st_uid.set(EgaFuse.getUid(name_));
         stat.st_gid.set(EgaFuse.getGid(name_));

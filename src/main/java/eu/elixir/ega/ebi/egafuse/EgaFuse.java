@@ -15,6 +15,27 @@
  */
 package eu.elixir.ega.ebi.egafuse;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Scanner;
+import java.util.Set;
+import java.util.StringTokenizer;
+
+import org.apache.commons.cli.BasicParser;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.identityconnectors.common.security.GuardedString;
+
 import com.google.api.client.auth.oauth2.PasswordTokenRequest;
 import com.google.api.client.auth.oauth2.RefreshTokenRequest;
 import com.google.api.client.auth.oauth2.TokenResponse;
@@ -24,7 +45,9 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.store.DataStoreFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
+
 import eu.elixir.ega.ebi.egafuse.filesystems.EgaApiDirectory;
 import eu.elixir.ega.ebi.egafuse.filesystems.EgaApiFile;
 import eu.elixir.ega.ebi.egafuse.filesystems.EgaApiPath;
@@ -35,17 +58,12 @@ import eu.elixir.ega.ebi.egafuse.filesystems.internal.EgaRemoteFile;
 import jnr.ffi.Pointer;
 import jnr.ffi.types.off_t;
 import jnr.ffi.types.size_t;
-import org.apache.commons.cli.*;
-import org.identityconnectors.common.security.GuardedString;
+import jnr.posix.util.Platform;
 import ru.serce.jnrfuse.ErrorCodes;
 import ru.serce.jnrfuse.FuseFillDir;
 import ru.serce.jnrfuse.FuseStubFS;
 import ru.serce.jnrfuse.struct.FileStat;
 import ru.serce.jnrfuse.struct.FuseFileInfo;
-
-import java.io.*;
-import java.nio.file.Paths;
-import java.util.*;
 
 /**
  * @author asenf
@@ -65,8 +83,8 @@ public class EgaFuse extends FuseStubFS {
      */
     private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
     // EGA AAI
-    private static final String TOKEN_SERVER_URL = "https://ega.ebi.ac.uk:8443/ega-openid-connect-server/token";
-    private static final String AUTHORIZATION_SERVER_URL = "https://ega.ebi.ac.uk:8443/ega-openid-connect-server/authorize";
+    private static String TOKEN_SERVER_URL = "https://ega.ebi.ac.uk:8443/ega-openid-connect-server/token";
+    private static String AUTHORIZATION_SERVER_URL = "https://ega.ebi.ac.uk:8443/ega-openid-connect-server/authorize";
     // *************************************************************************
     protected static HashMap<String, String> aaiConfig = null;
     private static boolean grid = false;
@@ -181,7 +199,10 @@ public class EgaFuse extends FuseStubFS {
         options.addOption("ft", "filetoken", true, "Specify File containing Access Token");
         options.addOption("g", "gridfuse", true, "Starts in GridFTP mode; required: orgaization");
         options.addOption("gf", "gridfile", true, "Account Mapping File");
-        options.addOption("url", "baseurl", true, "Alternate FUSE Base URL");
+        options.addOption("url_token", "url_token_server", true, "Alternate URL for active EGA API Token generator");
+        options.addOption("url_auth", "url_authorization_server", true, "Alternate URL for active Authorization server");
+        options.addOption("url_base", "url_base", true, "Alternate FUSE base URL");
+        options.addOption("url_cega", "url_cega", true, "Alternate URL for Central EGA");
         options.addOption("h", "help", false, "Display Help.");
 
     }
@@ -198,8 +219,18 @@ public class EgaFuse extends FuseStubFS {
                 help();
                 System.exit(0);
             }
-            if (cmd.hasOption("url")) {     // Provide a custom FUSE URL
-                baseUrl = cmd.getOptionValue("url");
+            // Provide alternative API URLs for services, defaults to EGA EBI URLs if none provided
+            if (cmd.hasOption("url_token")) {
+                TOKEN_SERVER_URL = cmd.getOptionValue("url_token");
+            }
+            if (cmd.hasOption("url_auth")) {
+                AUTHORIZATION_SERVER_URL = cmd.getOptionValue("url_auth");
+            }
+            if (cmd.hasOption("url_base")) {
+                baseUrl = cmd.getOptionValue("url_base");
+            }
+            if (cmd.hasOption("url_cega")) {
+                cegaUrl = cmd.getOptionValue("url_cega");
             }
             if (cmd.hasOption("f")) {       // USERNAME specified
                 String path = cmd.getOptionValue("f");
@@ -220,10 +251,12 @@ public class EgaFuse extends FuseStubFS {
                 mountDir = cmd.getOptionValue("m");
             }
             File mntTest = new File(mountDir);
-            if (!mntTest.exists() && !mntTest.isDirectory()) {
-                System.out.println(mntTest + " can not be used as mount point.");
-                System.out.println("Ensure that the directory path exists and is empty!");
-                System.exit(1);
+            if (!Platform.IS_WINDOWS) {
+                if (!mntTest.exists() && !mntTest.isDirectory()) {
+                    System.out.println(mntTest + " can not be used as mount point.");
+                    System.out.println("Ensure that the directory path exists and is empty!");
+                    System.exit(1);
+                }
             }
             if (cmd.hasOption("t")) {       // ACCESS TOKEN specified
                 accessToken = cmd.getOptionValue("t");
