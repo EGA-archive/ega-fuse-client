@@ -20,13 +20,29 @@ This will produce the FUSE later jar file in the /target directory.
 
 This FUSE layer has been tested on Mac OS as well. You must install Fuse for Mac / Osxfuse: https://osxfuse.github.io/ 
 
+### Windows Specific Installation:
+
+This FUSE layer has been tested on Windows OS as well. You must install WinFSP: https://github.com/billziss-gh/winfsp/releases/download/v1.2POST1/winfsp-1.2.17346.msi
+
 ## Starting the FUSE layer
 
 The FUSE layer requires at minimum a valid EGA OAuth2 Bearer Token to run; specifying a mount directory is recommened (default is /tmp/mnt). The mount directoty must be an existing and empty directory:
 
+For Linux & Mac:
 ```
-java -jar EgaFUSE-1.0-SNAPSHOT.jar -t {bearer token} -m {mount dir}
+java -jar ega-fuse-1.0-SNAPSHOT.jar -t {bearer token} -m {mount dir}
 ```
+
+For Windows:
+```
+java -Dfile.encoding=UTF-8 -jar ega-fuse-1.0-SNAPSHOT.jar -t {bearer token} -m {mount dir e.g, Z:\}
+```
+
+optional arguments:
+  -url_token
+  -url_auth
+  -url_base
+  -url_cega
 
 This will populate the {mount dir} with a directory called "Datasets". To view all datasets to which the OAuth2 token provides access:
 
@@ -51,7 +67,7 @@ userSecret:{AAI client Secret}
 The FUSE layer is then started as:
 
 ```
-java -jar EgaFUSE-1.0-SNAPSHOT.jar -t {bearer token} -rt {refresh token} -m {mount dir} -f config.ini
+java -jar ega-fuse-1.0-SNAPSHOT.jar -t {bearer token} -rt {refresh token} -m {mount dir} -f config.ini
 ```
 
 ## License
