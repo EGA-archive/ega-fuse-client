@@ -147,7 +147,7 @@ public class EgaNodeFile extends EgaApiFile {
 
         try {
             if (this.base64IV==null)
-                this.cache.get(0);
+                getIV();
             
             byte[] page = this.get(cachePage);
 
@@ -202,23 +202,16 @@ public class EgaNodeFile extends EgaApiFile {
         synchronized (this) {
 
             try {
-                String url = null;
-                if (page_number==0) { // First page: Get IV from server 
-                    url = getBaseUrl() + "/files/" + theFile.getFileId() +
-                        "?destinationFormat=" + format +
-                        "&destinationKey=" + urlEncodedKey +
-                        "&startCoordinate=" + offset +
-                        "&endCoordinate=" + (offset + bytesToRead);
-                } else { // Subsequent pages: use same IV that was used in first page
-                    byte[] iv = Base64.decode(base64IV);
-                    byte_increment_fast(iv, offset);
-                    url = getBaseUrl() + "/files/" + theFile.getFileId() +
-                        "?destinationFormat=" + format +
-                        "&destinationKey=" + urlEncodedKey +
-                        "&destinationIV=" + iv +
-                        "&startCoordinate=" + offset +
-                        "&endCoordinate=" + (offset + bytesToRead);                    
-                }
+                String url = null;                
+                byte[] iv = Base64.decode(base64IV);
+                byte_increment_fast(iv, offset);
+                url = getBaseUrl() + "/files/" + theFile.getFileId() +
+                    "?destinationFormat=" + format +
+                    "&destinationKey=" + urlEncodedKey +
+                    "&destinationIV=" + iv +
+                    "&startCoordinate=" + offset +
+                    "&endCoordinate=" + (offset + bytesToRead);                    
+                    
                 Request datasetRequest = new Request.Builder()
                         .url(url)
                         .addHeader("Authorization", "Basic " + getBasicCode())
@@ -287,5 +280,33 @@ public class EgaNodeFile extends EgaApiFile {
         }
     }
 
+    private void getIV() {
+        try{
+            String url = getBaseUrl() + "/files/" + theFile.getFileId() +
+                "?destinationFormat=" + format +
+                "&destinationKey=" + urlEncodedKey;
 
+            Request datasetRequest = new Request.Builder()
+                    .url(url)
+                    .addHeader("Authorization", "Basic " + getBasicCode())
+                    .build();
+
+            // Execute the request and retrieve the response.
+            Response response = client.newCall(datasetRequest).execute();
+            ResponseBody body = response.body();
+
+            InputStream byteStream = response.body().byteStream();
+            int bytesRead_ = 0;
+            byte[] buff = new byte[16];
+            bytesRead_ = byteStream.read(buff);
+            if (bytesRead_ < 16)
+                System.out.println("IV not fully read!");
+
+            this.base64IV = Base64.encode(buff);
+            
+            body.close();
+        } catch (IOException ex) {
+            Logger.getLogger(EgaNodeFile.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 }
