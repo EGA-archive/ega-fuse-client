@@ -19,6 +19,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.squareup.moshi.Moshi;
+import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 import eu.elixir.ega.ebi.egafuse.EgaFuse;
 import eu.elixir.ega.ebi.egafuse.dto.EgaFileDto;
 import eu.elixir.ega.ebi.egafuse.filesystems.EgaApiDirectory;
@@ -32,6 +33,7 @@ import ru.serce.jnrfuse.struct.FileStat;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
@@ -208,10 +210,12 @@ public class EgaNodeFile extends EgaApiFile {
                         "&startCoordinate=" + offset +
                         "&endCoordinate=" + (offset + bytesToRead);
                 } else { // Subsequent pages: use same IV that was used in first page
+                    byte[] iv = Base64.decode(base64IV);
+                    byte_increment_fast(iv, offset);
                     url = getBaseUrl() + "/files/" + theFile.getFileId() +
                         "?destinationFormat=" + format +
                         "&destinationKey=" + urlEncodedKey +
-                        "&destinationIV=" + base64IV +
+                        "&destinationIV=" + iv +
                         "&startCoordinate=" + offset +
                         "&endCoordinate=" + (offset + bytesToRead);                    
                 }
@@ -243,4 +247,45 @@ public class EgaNodeFile extends EgaApiFile {
 
         return bytesRead;
     }
+
+    private void byte_increment_fast(byte[] data, long increment) {
+        long countdown = increment / 16; // Count number of block updates
+
+        ArrayList<Integer> digits_ = new ArrayList<>();
+        int cnt = 0;
+        long d = 256, cn = 0;
+        while (countdown > cn && d > 0) {
+            int l = (int) ((countdown % d) / (d / 256));
+            digits_.add(l);
+            cn += (l * (d / 256));
+            d *= 256;
+        }
+        int size = digits_.size();
+        int[] digits = new int[size];
+        for (int i = 0; i < size; i++) {
+            digits[size - 1 - i] = digits_.get(i); // intValue()
+        }
+
+        int cur_pos = data.length - 1, carryover = 0, delta = data.length - digits.length;
+
+        for (int i = cur_pos; i >= delta; i--) { // Work on individual digits
+            int digit = digits[i - delta] + carryover; // convert to integer
+            int place = (int) (data[i] & 0xFF); // convert data[] to integer
+            int new_place = digit + place;
+            if (new_place >= 256) carryover = 1;
+            else carryover = 0;
+            data[i] = (byte) (new_place % 256);
+        }
+
+        // Deal with potential last carryovers
+        cur_pos -= digits.length;
+        while (carryover == 1 && cur_pos >= 0) {
+            data[cur_pos]++;
+            if (data[cur_pos] == 0) carryover = 1;
+            else carryover = 0;
+            cur_pos--;
+        }
+    }
+
+
 }
