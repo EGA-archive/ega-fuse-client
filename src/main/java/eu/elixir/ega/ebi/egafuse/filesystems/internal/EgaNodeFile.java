@@ -47,14 +47,17 @@ public class EgaNodeFile extends EgaApiFile {
     private final Moshi MOSHI = new Moshi.Builder().build();
     private String format = null;
     private EgaFileDto theFile;
+    private String urlEncodedKey = null;
+    private String base64IV = null;
     private LoadingCache<Integer, byte[]> cache;
 
     public EgaNodeFile(String name, EgaApiDirectory parent) {
         super(name, parent);
         setType();
         try {
-            format = ((EgaNodeDirectory) parent).getOrgName();
-            format = EgaFuse.getOrg(format); // Translate User to Org/Key
+            //format = ((EgaNodeDirectory) parent).getOrgName();
+            //format = EgaFuse.getOrg(format); // Translate User to Org/Key
+            format = "aes256";
         } catch (Throwable t) {
             System.out.println(t.toString());
         }
@@ -88,6 +91,24 @@ public class EgaNodeFile extends EgaApiFile {
                         });
     }
 
+    public EgaNodeFile(String name, EgaApiDirectory parent, EgaFileDto theFile, String urlEncodedKey) {
+        super(name, parent, (urlEncodedKey!=null));
+        this.theFile = theFile;
+        this.urlEncodedKey = urlEncodedKey;
+        setType();
+
+        // Init cache
+        this.cache = CacheBuilder.newBuilder()
+                .maximumSize(NUM_PAGES)
+                .concurrencyLevel(NUM_PAGES)
+                .build(
+                        new CacheLoader<Integer, byte[]>() {
+                            public byte[] load(Integer page) throws Exception {
+                                return populateCache(page);
+                            }
+                        });
+    }
+/*    
     @Override
     protected void setType() {
         if (name.toLowerCase().endsWith(".gpg")) {
@@ -99,12 +120,12 @@ public class EgaNodeFile extends EgaApiFile {
             type = "SOURCE";
         }
     }
-
+*/
     @Override
     public void getattr(FileStat stat) {
         //stat.st_mode.set(FileStat.S_IFREG | 0444);
         stat.st_mode.set(FileStat.S_IFREG | 0550);
-        long size = (type.equalsIgnoreCase("CIP")) ? theFile.getFileSize() - 16 : theFile.getFileSize();
+        long size = theFile.getFileSize(); // Including IV
         stat.st_size.set(size);
         String name_ = getRootName();
         stat.st_uid.set(EgaFuse.getUid(name_));
@@ -114,7 +135,7 @@ public class EgaNodeFile extends EgaApiFile {
     // Read Bytes from API
     public int read(Pointer buffer, long size, long offset) {
         // Get the size of the file
-        long fsize = (type.equalsIgnoreCase("CIP")) ? this.theFile.getFileSize() - 16 : this.theFile.getFileSize();
+        long fsize = this.theFile.getFileSize();
         int bytesToRead = (int) Math.min(fsize - offset, size);
 
         int cachePage = (int) (offset / PAGE_SIZE); // 0,1,2,...
@@ -123,6 +144,9 @@ public class EgaNodeFile extends EgaApiFile {
         System.out.println("read() fsize: " + fsize + " bytesToRead: " + bytesToRead);
 
         try {
+            if (this.base64IV==null)
+                this.cache.get(0);
+            
             byte[] page = this.get(cachePage);
 
             int page_offset = (int) (offset - cachePage * PAGE_SIZE);
@@ -176,11 +200,21 @@ public class EgaNodeFile extends EgaApiFile {
         synchronized (this) {
 
             try {
-                String url = getBaseUrl() + "/files/" + theFile.getFileId() +
+                String url = null;
+                if (page_number==0) { // First page: Get IV from server 
+                    url = getBaseUrl() + "/files/" + theFile.getFileId() +
                         "?destinationFormat=" + format +
+                        "&destinationKey=" + urlEncodedKey +
                         "&startCoordinate=" + offset +
                         "&endCoordinate=" + (offset + bytesToRead);
-
+                } else { // Subsequent pages: use same IV that was used in first page
+                    url = getBaseUrl() + "/files/" + theFile.getFileId() +
+                        "?destinationFormat=" + format +
+                        "&destinationKey=" + urlEncodedKey +
+                        "&destinationIV=" + base64IV +
+                        "&startCoordinate=" + offset +
+                        "&endCoordinate=" + (offset + bytesToRead);                    
+                }
                 Request datasetRequest = new Request.Builder()
                         .url(url)
                         .addHeader("Authorization", "Basic " + getBasicCode())

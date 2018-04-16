@@ -119,6 +119,11 @@ public class EgaNodeDirectory extends EgaApiDirectory {
                 .build();
 
         try {
+            // Generate key for this file
+            EgaNodeKeyFile newKeyFile = new EgaNodeKeyFile(datasetId.concat(".key"), this);
+            contents.add(newKeyFile);
+            String urlEncodedKey = newKeyFile.getUrlEncodedKey();
+            
             // Add List all Files for this Dataset
             Response fileResponse = null;
             int tryCount = 9;
@@ -139,7 +144,7 @@ public class EgaNodeDirectory extends EgaApiDirectory {
                     filename = filename.substring(filename.lastIndexOf("/") + 1);
                 }
                 String fileUrl = getBaseUrl() + "/files/" + file.getFileId();
-                EgaNodeFile newFile = new EgaNodeFile(filename, this, file);
+                EgaNodeFile newFile = new EgaNodeFile(filename, this, file, urlEncodedKey);
                 contents.add(newFile);
             }
         } catch (IOException ex) {

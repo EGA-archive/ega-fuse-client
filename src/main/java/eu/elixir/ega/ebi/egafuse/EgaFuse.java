@@ -54,6 +54,7 @@ import eu.elixir.ega.ebi.egafuse.filesystems.EgaApiPath;
 import eu.elixir.ega.ebi.egafuse.filesystems.internal.EgaDatasetDirectory;
 import eu.elixir.ega.ebi.egafuse.filesystems.internal.EgaNodeDirectory;
 import eu.elixir.ega.ebi.egafuse.filesystems.internal.EgaNodeFile;
+import eu.elixir.ega.ebi.egafuse.filesystems.internal.EgaNodeKeyFile;
 import eu.elixir.ega.ebi.egafuse.filesystems.internal.EgaRemoteFile;
 import jnr.ffi.Pointer;
 import jnr.ffi.types.off_t;
@@ -133,7 +134,7 @@ public class EgaFuse extends FuseStubFS {
         }
     }
 
-    public EgaFuse(boolean basicgrid) { // Only valid with Access Token!
+    public EgaFuse(boolean basicgrid) { // Only valid Basic Auth Header
         if (basicgrid) {
             getOrgsNodes();
         }
@@ -672,6 +673,8 @@ public class EgaFuse extends FuseStubFS {
 
         if (p instanceof EgaRemoteFile) {
             return ((EgaRemoteFile) p).read(buf, size, offset);
+        } else if (p instanceof EgaNodeKeyFile) {
+            return ((EgaNodeKeyFile) p).read(buf, size, offset);
         } else {
             return ((EgaNodeFile) p).read(buf, size, offset);
         }

@@ -25,11 +25,17 @@ public abstract class EgaApiFile extends EgaApiPath {
 
     protected String type; // Source Encryption Type (CIP, GPG, SOURCE)
     protected String target = null; // Source Encryption Type (CIP, GPG, SOURCE)
+    protected boolean encrypted = false;
 
     protected OkHttpClient client;
 
     public EgaApiFile(String name, EgaApiDirectory parent) {
         super(name, parent);
+    }
+    
+    public EgaApiFile(String name, EgaApiDirectory parent, boolean encrypted) {
+        super(name, parent);
+        this.encrypted = encrypted;
     }
 
     // Most functionality should be shared between both File and Ticket access
@@ -38,10 +44,10 @@ public abstract class EgaApiFile extends EgaApiPath {
     protected void setType() {
         if (name.toLowerCase().endsWith(".gpg")) {
             type = "GPG";
-            name = name.substring(0, name.length() - 4);
+            if (!encrypted) name = name.substring(0, name.length() - 4);
         } else if (name.toLowerCase().endsWith(".cip")) {
             type = "CIP";
-            name = name.substring(0, name.length() - 4);
+            if (!encrypted) name = name.substring(0, name.length() - 4);
         } else {
             type = "SOURCE";
         }
