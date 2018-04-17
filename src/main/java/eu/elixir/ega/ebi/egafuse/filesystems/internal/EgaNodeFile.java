@@ -51,6 +51,7 @@ public class EgaNodeFile extends EgaApiFile {
     private EgaFileDto theFile;
     private String urlEncodedKey = null;
     private String base64IV = null;
+    private byte[] IV = null;
     private LoadingCache<Integer, byte[]> cache;
 
     public EgaNodeFile(String name, EgaApiDirectory parent) {
@@ -110,19 +111,7 @@ public class EgaNodeFile extends EgaApiFile {
                             }
                         });
     }
-/*    
-    @Override
-    protected void setType() {
-        if (name.toLowerCase().endsWith(".gpg")) {
-            type = "GPG";
-        } else if (name.toLowerCase().endsWith(".cip")) {
-            type = "CIP";
-            name = name.substring(0, name.length() - 4) + ".gpg";
-        } else {
-            type = "SOURCE";
-        }
-    }
-*/
+
     @Override
     public void getattr(FileStat stat) {
         //stat.st_mode.set(FileStat.S_IFREG | 0444);
@@ -138,27 +127,35 @@ public class EgaNodeFile extends EgaApiFile {
     public int read(Pointer buffer, long size, long offset) {
         // Get the size of the file
         long fsize = this.theFile.getFileSize();
-        int bytesToRead = (int) Math.min(fsize - offset, size);
 
-        int cachePage = (int) (offset / PAGE_SIZE); // 0,1,2,...
+        // Adjust for IV.. subtract 16 bytes from offset
+        long iv_offset = (offset>16)?(offset-16):0;
+        int iv_delta = (int) ((offset<16)?(16-offset):0);
+        int bytesToRead = (int) Math.min(fsize - iv_offset, size);
 
-        System.out.println("read() offset: " + offset + " size: " + size);
-        System.out.println("read() fsize: " + fsize + " bytesToRead: " + bytesToRead);
+        int cachePage = (int) (iv_offset / PAGE_SIZE); // 0,1,2,...
 
         try {
             if (this.base64IV==null)
                 getIV();
             
+            // If part of the IV was requested
+            long start_offset = 0L;
+            if (iv_delta>0) {
+                buffer.put(0L, this.IV, (int) offset, iv_delta);
+                start_offset = iv_delta;
+            }
+
             byte[] page = this.get(cachePage);
 
-            int page_offset = (int) (offset - cachePage * PAGE_SIZE);
+            int page_offset = (int) (iv_offset - cachePage * PAGE_SIZE);
             int bytesToCopy = Math.min(bytesToRead, page.length - page_offset);
-            buffer.put(0L, page, page_offset, bytesToCopy);
+            buffer.put(start_offset+0L, page, page_offset, bytesToCopy);
 
             int bytesRemaining = bytesToRead - bytesToCopy;
             if (bytesRemaining > 0) {
                 page = this.get(cachePage + 1); // this.cache.get(cachePage+1);
-                buffer.put(bytesToCopy, page, 0, bytesRemaining);
+                buffer.put(start_offset+bytesToCopy, page, 0, bytesRemaining);
             }
 
         } catch (ExecutionException e) {
@@ -297,12 +294,12 @@ public class EgaNodeFile extends EgaApiFile {
 
             InputStream byteStream = response.body().byteStream();
             int bytesRead_ = 0;
-            byte[] buff = new byte[16];
-            bytesRead_ = byteStream.read(buff);
+            this.IV = new byte[16];
+            bytesRead_ = byteStream.read(this.IV);
             if (bytesRead_ < 16)
                 System.out.println("IV not fully read!");
 
-            this.base64IV = Base64.encode(buff);
+            this.base64IV = Base64.encode(this.IV);
             
             body.close();
         } catch (IOException ex) {
