@@ -124,7 +124,7 @@ public class EgaNodeFile extends EgaApiFile {
     }
 
     // Read Bytes from API
-    public int read(Pointer buffer, long size, long offset) {
+    public synchronized int read(Pointer buffer, long size, long offset) {
         // Get the size of the file
         long fsize = this.theFile.getFileSize();
 
@@ -149,6 +149,7 @@ public class EgaNodeFile extends EgaApiFile {
             byte[] page = this.get(cachePage);
 
             int page_offset = (int) (iv_offset - cachePage * PAGE_SIZE);
+            bytesToRead -= start_offset;
             int bytesToCopy = Math.min(bytesToRead, page.length - page_offset);
             buffer.put(start_offset+0L, page, page_offset, bytesToCopy);
 
