@@ -98,9 +98,9 @@ public class EgaFuse extends FuseStubFS {
     // *************************************************************************
     private static String accessToken; // If missing: obtain; requires aaiUrl
     private static String refreshToken; // Test
-    private static String baseUrl = "https://ega.ebi.ac.uk:8051/elixir/data"; // API URL. Required
+    private static String baseUrl = "https://ega.ebi.ac.uk:8052/elixir/data"; // API URL. Required
     // for CSC: "http://data.epouta.lega.csc.fi:8686/elixir/data"; -- Specify via option upon start
-    private static String cegaUrl = "https://ega.ebi.ac.uk:8051/elixir/central"; // API URL. Required
+    private static String cegaUrl = "https://ega.ebi.ac.uk:8052/elixir/central"; // API URL. Required
     private static Options options = new Options();
     /**
      * Global instance of the {@link DataStoreFactory}. The best practice is to make it a single
@@ -140,7 +140,7 @@ public class EgaFuse extends FuseStubFS {
         }
     }
 
-    /* https://ega.ebi.ac.uk:8051/elixir/
+    /* https://ega.ebi.ac.uk:8052/elixir/
      * Start of the FUSE Layer
      *
      * 2 Options:
