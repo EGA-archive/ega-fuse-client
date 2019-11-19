@@ -70,6 +70,22 @@ The FUSE layer is then started as:
 java -jar ega-fuse-1.0-SNAPSHOT.jar -t {bearer token} -rt {refresh token} -m {mount dir} -f config.ini
 ```
 
+
+The fuse layer can also be started, restarted and stoped using shell script ./fuseclient.sh as:
+
+```
+ ./fuseclient.sh start "-t {bearer token} -rt {refresh token} -m {mount dir} -f config.ini"
+```
+ 
+```
+  ./fuseclient.sh restart "-t {bearer token} -rt {refresh token} -m {mount dir} -f config.ini"
+```
+
+``` 
+  ./fuseclient.sh stop
+```
+ 
+
 ## License
 
 This project is licensed under the Apache 2.0 License - see the [LICENSE.md](LICENSE.md) file for details
