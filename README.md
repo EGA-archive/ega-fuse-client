@@ -84,7 +84,14 @@ The fuse layer can also be started, restarted and stoped using shell script ./fu
 ``` 
   ./fuseclient.sh stop
 ```
- 
+### Troubleshoot fuseclient.sh
+Check the log file fuse-client-logs.log, If you see any error as /tmp/mnt can not be used as mount point. Try running below command
+
+```
+umount -l /tmp/mnt
+```
+
+Note: Change /tmp/mnt to your mount point path 
 
 ## License
 
