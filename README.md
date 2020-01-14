@@ -29,11 +29,13 @@ This FUSE layer has been tested on Windows OS as well. You must install WinFSP: 
 The FUSE layer requires at minimum a valid EGA OAuth2 Bearer Token to run; specifying a mount directory is recommened (default is /tmp/mnt). The mount directoty must be an existing and empty directory:
 
 For Linux & Mac:
+
 ```
 java -jar ega-fuse-1.0-SNAPSHOT.jar -t {bearer token} -m {mount dir}
 ```
 
 For Windows:
+
 ```
 java -Dfile.encoding=UTF-8 -jar ega-fuse-1.0-SNAPSHOT.jar -t {bearer token} -m {mount dir e.g, Z:\}
 ```
@@ -57,18 +59,61 @@ The same procedure then applies to Dataset directories. Change into a dataset, t
 
 ## Starting the FUSE layer with Refresh Tokens
 
-OAuth2 Bearer tokens have a validity of 1 hour. For tasks lasting longer than one hour a refresh token can be specified; in this case a config file (e.g. config.ini) must also be provided with specifications on how to contact the AAI. The config file must contain these entries:
-
-```
-userId:{AAI client ID}
-userSecret:{AAI client Secret}
-```
+OAuth2 Bearer tokens have a validity of 1 hour. For tasks lasting longer than one hour a refresh token can be specified; in this case a config file (e.g. config.ini) must also be provided with specifications on how to contact the AAI. The file config.ini is provided here in the project and it is same for everyone.
 
 The FUSE layer is then started as:
 
 ```
 java -jar ega-fuse-1.0-SNAPSHOT.jar -t {bearer token} -rt {refresh token} -m {mount dir} -f config.ini
 ```
+
+FUSE layer can also run using username and password as:
+
+```
+java -jar ega-fuse-1.0-SNAPSHOT.jar -u {username} -p {password} -m {mount dir} -f config.ini
+```
+
+## Starting the FUSE layer in background with a script
+The fuse layer can also be started, restarted and stopped using shell script ./fuseclient.sh as:
+
+```
+ ./fuseclient.sh start "-t {bearer token} -m {mount dir} -f config.ini"
+```
+ 
+```
+  ./fuseclient.sh restart "-t {bearer token} -m {mount dir} -f config.ini"
+```
+
+``` 
+  ./fuseclient.sh stop
+```
+### Troubleshoot fuseclient.sh
+Check the log file fuse-client-logs.log, If you see any error as /tmp/mnt can not be used as mount point. Try running below command
+
+```
+umount -l /tmp/mnt
+```
+
+Note: Change /tmp/mnt to your mount point path 
+
+### Generate the Bearer token & Refresh token
+To get the bearer token use below command. Replace your username and password:
+
+```
+curl -k --data "grant_type=password&client_id=f20cd2d3-682a-4568-a53e-4262ef54c8f4&client_secret=AMenuDLjVdVo4BSwi0QD54LL6NeVDEZRzEQUJ7hJOM3g4imDZBHHX0hNfKHPeQIGkskhtCmqAJtt_jm7EKq-rWw&username={USERNAME}&password={PASSWORD}&scope=openid" https://ega.ebi.ac.uk:8443/ega-openid-connect-server/token
+```
+
+This produces a JSON response containing these elements `{"access_token":"###","token_type":"Bearer","expires_in":3599,"scope":"openid","id_token":"###"}`.
+Here the value of access_token is the bearer token.
+
+To get the refresh token use below command. Replace your username and password:
+
+```
+curl -k --data "grant_type=password&client_id=f20cd2d3-682a-4568-a53e-4262ef54c8f4&client_secret=AMenuDLjVdVo4BSwi0QD54LL6NeVDEZRzEQUJ7hJOM3g4imDZBHHX0hNfKHPeQIGkskhtCmqAJtt_jm7EKq-rWw&username={USERNAME}&password={PASSWORD}&scope=openid offline_access" https://ega.ebi.ac.uk:8443/ega-openid-connect-server/token
+```
+
+This produces a JSON response containing these elements `{"access_token":"###","token_type":"Bearer", "refresh_token": "###","expires_in":3599,"scope":"openid offline_access","id_token":"###"}`.
+Here the value of access_token is the bearer token. The “refresh_token” is optionally necessary if it is expected to run for longer than 1 hour)
 
 ## License
 
