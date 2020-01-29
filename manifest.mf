@@ -1,5 +1,0 @@
-Manifest-Version: 1.0
-Class-Path: .
-Main-Class: eu.elixir.ega.ebi.egafuse.EgaFuse.class
-
-
