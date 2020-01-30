@@ -31,13 +31,13 @@ The FUSE layer requires at minimum a valid EGA OAuth2 Bearer Token to run; speci
 For Linux & Mac:
 
 ```
-java -jar ega-fuse-1.0-SNAPSHOT.jar -t {bearer token} -m {mount dir}
+java -jar ega-fuse-0.1.0.jar -t {bearer token} -m {mount dir}
 ```
 
 For Windows:
 
 ```
-java -Dfile.encoding=UTF-8 -jar ega-fuse-1.0-SNAPSHOT.jar -t {bearer token} -m {mount dir e.g, Z:\}
+java -Dfile.encoding=UTF-8 -jar ega-fuse-0.1.0.jar -t {bearer token} -m {mount dir e.g, Z:\}
 ```
 
 optional arguments:
@@ -64,13 +64,13 @@ OAuth2 Bearer tokens have a validity of 1 hour. For tasks lasting longer than on
 The FUSE layer is then started as:
 
 ```
-java -jar ega-fuse-1.0-SNAPSHOT.jar -t {bearer token} -rt {refresh token} -m {mount dir} -f config.ini
+java -jar ega-fuse-0.1.0.jar -t {bearer token} -rt {refresh token} -m {mount dir} -f config.ini
 ```
 
 FUSE layer can also run using username and password as:
 
 ```
-java -jar ega-fuse-1.0-SNAPSHOT.jar -u {username} -p {password} -m {mount dir} -f config.ini
+java -jar ega-fuse-0.1.0.jar -u {username} -p {password} -m {mount dir} -f config.ini
 ```
 
 ## Starting the FUSE layer in background with a script
