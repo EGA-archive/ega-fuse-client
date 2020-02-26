@@ -68,7 +68,13 @@
             <version>22.0</version>
         </dependency>
     </dependencies>
-         
+    <repositories>
+        <repository>
+            <id>spring-repo</id>
+            <url>https://repo.spring.io/plugins-release</url>
+        </repository>
+    </repositories>
+    
     <build>
         <plugins>
             <plugin>
