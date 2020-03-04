@@ -61,7 +61,7 @@ public class EgaRemoteFile extends EgaApiFile {
     }
 
     private void setCache() {
-        NUM_PAGES = EgaFuse.getConnection() > 20 ? Math.min(EgaFuse.getConnection(), 20) : EgaFuse.getConnection();
+        NUM_PAGES = Math.min(EgaFuse.getConnection(), 20);
         this.cache = CacheBuilder.newBuilder()
                 .maximumSize(NUM_PAGES * 2)
                 .concurrencyLevel(NUM_PAGES)
