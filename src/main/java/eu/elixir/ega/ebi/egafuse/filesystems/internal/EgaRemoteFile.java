@@ -18,7 +18,6 @@ package eu.elixir.ega.ebi.egafuse.filesystems.internal;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.squareup.moshi.Moshi;
 import eu.elixir.ega.ebi.egafuse.EgaFuse;
 import eu.elixir.ega.ebi.egafuse.dto.EgaFileDto;
 import eu.elixir.ega.ebi.egafuse.filesystems.EgaApiDirectory;
@@ -44,35 +43,27 @@ import java.util.logging.Logger;
 public class EgaRemoteFile extends EgaApiFile {
 
     private static final long PAGE_SIZE = 1024L * 1024L * 10L;
-    private static final int NUM_PAGES = 7;
-    private final Moshi MOSHI = new Moshi.Builder().build();
+    private static int NUM_PAGES;
     private EgaFileDto theFile;
     private LoadingCache<Integer, byte[]> cache;
 
     public EgaRemoteFile(String name, EgaApiDirectory parent) {
         super(name, parent);
         setType();
-
-        // Init cache
-        this.cache = CacheBuilder.newBuilder()
-                .maximumSize(NUM_PAGES)
-                .concurrencyLevel(NUM_PAGES * 2)
-                .build(
-                        new CacheLoader<Integer, byte[]>() {
-                            public byte[] load(Integer page) throws Exception {
-                                return populateCache(page);
-                            }
-                        });
+        setCache();
     }
 
     public EgaRemoteFile(String name, EgaApiDirectory parent, EgaFileDto theFile) {
         super(name, parent);
         this.theFile = theFile;
         setType();
+        setCache();
+    }
 
-        // Init cache
+    private void setCache() {
+        NUM_PAGES = EgaFuse.getConnection() > 20 ? Math.min(EgaFuse.getConnection(), 20) : EgaFuse.getConnection();
         this.cache = CacheBuilder.newBuilder()
-                .maximumSize(NUM_PAGES)
+                .maximumSize(NUM_PAGES * 2)
                 .concurrencyLevel(NUM_PAGES)
                 .build(
                         new CacheLoader<Integer, byte[]>() {
@@ -154,7 +145,6 @@ public class EgaRemoteFile extends EgaApiFile {
                 "?destinationFormat=plain" +
                 "&startCoordinate=" + offset +
                 "&endCoordinate=" + (offset + bytesToRead) + "      " + bytesToRead);
-        synchronized (this) {
 
             try {
                 String format = "plain";
@@ -218,9 +208,6 @@ public class EgaRemoteFile extends EgaApiFile {
                 Logger.getLogger(EgaRemoteFile.class.getName()).log(Level.SEVERE, null, ex);
                 throw new IOException();
             }
-
-        }
-
         return bytesRead;
     }
 

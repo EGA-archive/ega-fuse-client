@@ -1,5 +1,5 @@
 SERVICE_NAME="Fuse client"
-JAR_NAME="ega-fuse-0.1.0.jar"
+JAR_NAME="ega-fuse-0.2.0.jar"
 PATH_TO_JAR="target/$JAR_NAME"
 PROCESSCNT=$(ps x |grep -v grep |grep -c "$JAR_NAME")
 PID=$(ps aux | grep "$JAR_NAME" | grep -v grep | awk '{print $2}')

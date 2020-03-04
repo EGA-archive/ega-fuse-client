@@ -94,6 +94,8 @@ public class EgaFuse extends FuseStubFS {
     // Specified by command line parameters
     private static GuardedString username; // Optional, if token is specified
     private static GuardedString password; // Optional, if token is specified
+    private static int connection = 4;
+
     private static String mountDir = "/tmp/mnt"; // Required: mount directory
     // *************************************************************************
     private static String accessToken; // If missing: obtain; requires aaiUrl
@@ -193,6 +195,7 @@ public class EgaFuse extends FuseStubFS {
         options.addOption("f", "configfile", true, "Configuration file path.");
         options.addOption("u", "username", true, "Specify Username.");
         options.addOption("p", "password", true, "Specify Password.");
+        options.addOption("c", "connection", true, "Specify parallel connection.");
         options.addOption("m", "mount", true, "Specify Mount Directory.");
         options.addOption("t", "token", true, "Specify Access Token.");
         options.addOption("rt", "refresh_token", true, "Specify Refresh Token.");
@@ -247,6 +250,9 @@ public class EgaFuse extends FuseStubFS {
             }
             if (cmd.hasOption("p")) {       // PASSWORD specified
                 password = new GuardedString(cmd.getOptionValue("p").toCharArray());
+            }
+            if (cmd.hasOption("c")) {     
+                connection = Integer.valueOf(cmd.getOptionValue("c"));
             }
             if (cmd.hasOption("m")) {       // MOUNT DIRECTORY specified
                 mountDir = cmd.getOptionValue("m");
@@ -705,4 +711,9 @@ public class EgaFuse extends FuseStubFS {
 
         return 0;
     }
+
+    public static int getConnection() {
+        return connection;
+    }
+    
 }
