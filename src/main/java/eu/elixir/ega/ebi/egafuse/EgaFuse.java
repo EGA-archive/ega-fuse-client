@@ -24,6 +24,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -251,8 +252,8 @@ public class EgaFuse extends FuseStubFS {
             if (cmd.hasOption("p")) {       // PASSWORD specified
                 password = new GuardedString(cmd.getOptionValue("p").toCharArray());
             }
-            if (cmd.hasOption("c")) {     
-                connection = Integer.valueOf(cmd.getOptionValue("c"));
+            if (cmd.hasOption("c")) {  
+                connection = Integer.parseInt(Optional.ofNullable(cmd.getOptionValue("c")).orElse("4"));
             }
             if (cmd.hasOption("m")) {       // MOUNT DIRECTORY specified
                 mountDir = cmd.getOptionValue("m");

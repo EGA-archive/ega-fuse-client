@@ -50,17 +50,17 @@ public class EgaRemoteFile extends EgaApiFile {
     public EgaRemoteFile(String name, EgaApiDirectory parent) {
         super(name, parent);
         setType();
-        setCache();
+        initializeCache();
     }
 
     public EgaRemoteFile(String name, EgaApiDirectory parent, EgaFileDto theFile) {
         super(name, parent);
         this.theFile = theFile;
         setType();
-        setCache();
+        initializeCache();
     }
 
-    private void setCache() {
+    private void initializeCache() {
         NUM_PAGES = Math.min(EgaFuse.getConnection(), 20);
         this.cache = CacheBuilder.newBuilder()
                 .maximumSize(NUM_PAGES * 2)
