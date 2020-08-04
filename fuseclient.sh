@@ -1,5 +1,20 @@
 SERVICE_NAME="Fuse client"
-JAR_NAME="ega-fuse-client-2.0.0.jar"
+JAR_NAME=$(ls target/ | grep ".*\.jar$")
+JAR_COUNT=$(ls target/ | grep ".*\.jar$" | wc -l)
+
+if [ $JAR_COUNT -eq 0 ]; then
+    echo 'There is no jar file in target directory. Please build project again.'
+    exit;
+elif [ $JAR_COUNT -gt 1 ]; then
+    echo 'There are more than one jar file in target directory. Please build project again.'
+    exit;
+fi
+
+if [ -z $JAR_NAME ]; then
+    echo "jar file doesn't exists in target directory!"
+    exit;
+fi
+
 PATH_TO_JAR="target/$JAR_NAME"
 PROCESSCNT=$(ps x |grep -v grep |grep -c "$JAR_NAME")
 PID=$(ps aux | grep "$JAR_NAME" | grep -v grep | awk '{print $2}')

@@ -29,7 +29,7 @@ brew cask install osxfuse
 
 To build the project run the command below. It will produce the executable jar file in the /target directory.
 ```
-mvn install
+mvn clean install
 ```
 
 ## Run the project
