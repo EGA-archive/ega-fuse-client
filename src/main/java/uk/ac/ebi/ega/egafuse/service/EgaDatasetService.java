@@ -95,7 +95,7 @@ public class EgaDatasetService implements IEgaDatasetService {
 
         for (EgaFile egaFile : egaFiles) {
             EgaDirectory currentDirectory = null;
-            String filePath = recreateFilePath(egaFile.getFile().getFilePath().trim());
+            String filePath = recreateFilePath(egaFile.getFile().getDisplayFilePath().trim());
                     
             // if file does not have any directory
             if (filePath.endsWith(".cip")) {

@@ -113,7 +113,7 @@ public class EgaDirectoryTest {
         file.setFileId("EGAF00001");
         file.setFileName("test1.cip");
         file.setDisplayFileName("test1");
-        file.setFilePath("A/B");
+        file.setDisplayFilePath("A/B");
         file.setFileSize(100l);
         files.add(file);
 
@@ -136,7 +136,7 @@ public class EgaDirectoryTest {
         file.setFileId("EGAF00001");
         file.setFileName("test1.cip");
         file.setDisplayFileName("test1");
-        file.setFilePath("A/B");
+        file.setDisplayFilePath("A/B");
         file.setFileSize(100l);
         files.add(file);
 
@@ -150,8 +150,8 @@ public class EgaDirectoryTest {
         EgaDirectory secondDirectory = (EgaDirectory) firstDirectory.contents.get(0);
         EgaFile fileOutput = (EgaFile) secondDirectory.contents.get(0);
 
-        assertEquals(file.getFilePath().split("/")[0], firstDirectory.getName());
-        assertEquals(file.getFilePath().split("/")[1], secondDirectory.getName());
+        assertEquals(file.getDisplayFilePath().split("/")[0], firstDirectory.getName());
+        assertEquals(file.getDisplayFilePath().split("/")[1], secondDirectory.getName());
         assertEquals(file.getDisplayFileName(), fileOutput.getName());
     }
     
@@ -163,25 +163,25 @@ public class EgaDirectoryTest {
         file1.setFileId("test");
         file1.setFileName("test.cip");
         file1.setDisplayFileName("test.cip");
-        file1.setFilePath("a");
+        file1.setDisplayFilePath("a");
 
         File file2 = new File();
         file2.setFileId("test2");
         file2.setFileName("test2.cip");
         file2.setDisplayFileName("test2.cip");
-        file2.setFilePath("a");
+        file2.setDisplayFilePath("a");
         
         File file3 = new File();
         file3.setFileId("test");
         file3.setFileName("test.cip");
         file3.setDisplayFileName("test.cip");
-        file3.setFilePath("a/b");
+        file3.setDisplayFilePath("a/b");
 
         File file4 = new File();
         file4.setFileId("test");
         file4.setFileName("test.cip");
         file4.setDisplayFileName("test.cip");
-        file4.setFilePath("/test.cip");
+        file4.setDisplayFilePath("/test.cip");
 
         List<File> egaFiles = new ArrayList<>();
         egaFiles.add(file1);
@@ -204,12 +204,12 @@ public class EgaDirectoryTest {
         
         EgaFile thirdDirectoryFirstFile = (EgaFile) secondDirectory.contents.get(0);
 
-        assertEquals(file1.getFilePath().split("/")[0], firstDirectory.getName());
+        assertEquals(file1.getDisplayFilePath().split("/")[0], firstDirectory.getName());
         assertEquals(file1.getDisplayFileName(), secondDirectoryFirstFile.getName());
-        assertEquals(file2.getFilePath().split("/")[0], firstDirectory.getName());
+        assertEquals(file2.getDisplayFilePath().split("/")[0], firstDirectory.getName());
         assertEquals(file2.getDisplayFileName(), secondDirectorySecondFile.getName());        
-        assertEquals(file3.getFilePath().split("/")[0], firstDirectory.getName());
-        assertEquals(file3.getFilePath().split("/")[1], secondDirectory.getName());
+        assertEquals(file3.getDisplayFilePath().split("/")[0], firstDirectory.getName());
+        assertEquals(file3.getDisplayFilePath().split("/")[1], secondDirectory.getName());
         assertEquals(file3.getDisplayFileName(), thirdDirectoryFirstFile.getName());        
         assertEquals(file4.getDisplayFileName(), firstDirectoryFirstFile.getName());
     }

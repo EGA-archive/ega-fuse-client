@@ -22,7 +22,7 @@ public class File {
     private String datasetId;
     private String displayFileName;
     private String fileName;
-    private String filePath;
+    private String displayFilePath;
     private String fileStatus;
     private String unencryptedChecksum;
     private String unencryptedChecksumType;
@@ -60,12 +60,12 @@ public class File {
         this.fileName = fileName;
     }
 
-    public String getFilePath() {
-        return filePath;
+    public String getDisplayFilePath() {
+        return displayFilePath;
     }
 
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
+    public void setDisplayFilePath(String displayFilePath) {
+        this.displayFilePath = displayFilePath;
     }
 
     public String getFileStatus() {
@@ -103,7 +103,7 @@ public class File {
     @Override
     public String toString() {
         return "File [fileId=" + fileId + ", datasetId=" + datasetId + ", displayFileName=" + displayFileName
-                + ", fileName=" + fileName + ", filePath=" + filePath + ", fileStatus=" + fileStatus + ", unencryptedChecksum="
+                + ", fileName=" + fileName + ", displayFilePath=" + displayFilePath + ", fileStatus=" + fileStatus + ", unencryptedChecksum="
                 + unencryptedChecksum + ", unencryptedChecksumType=" + unencryptedChecksumType + ", fileSize="
                 + fileSize + "]";
     }

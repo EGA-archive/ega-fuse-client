@@ -94,7 +94,7 @@ public class EgaDatasetServiceTest {
         File file1 = new File();
         file1.setFileId("EGAF01");
         file1.setFileName("EGAF01.cip");
-        file1.setFilePath("A/B/C/");
+        file1.setDisplayFilePath("A/B/C/");
         EgaFile egaFile = new EgaFile("EGAF01", file1, null);
         List<EgaFile> egaFiles = new ArrayList<>();
         egaFiles.add(egaFile);
@@ -106,9 +106,9 @@ public class EgaDatasetServiceTest {
         EgaDirectory thirdDirectory = (EgaDirectory) secondDirectory.contents.get(0);
         EgaFile file = (EgaFile) thirdDirectory.contents.get(0);
 
-        assertEquals(file1.getFilePath().split("/")[0], firstDirectory.getName());
-        assertEquals(file1.getFilePath().split("/")[1], secondDirectory.getName());
-        assertEquals(file1.getFilePath().split("/")[2], thirdDirectory.getName());
+        assertEquals(file1.getDisplayFilePath().split("/")[0], firstDirectory.getName());
+        assertEquals(file1.getDisplayFilePath().split("/")[1], secondDirectory.getName());
+        assertEquals(file1.getDisplayFilePath().split("/")[2], thirdDirectory.getName());
         assertEquals(egaFile.getName(), file.getName());
     }
 
@@ -119,13 +119,13 @@ public class EgaDatasetServiceTest {
         File file1 = new File();
         file1.setFileId("EGAF01");
         file1.setFileName("EGAF01.cip");
-        file1.setFilePath("A/B/C");
+        file1.setDisplayFilePath("A/B/C");
         EgaFile egaFile1 = new EgaFile("EGAF01", file1, null);
 
         File file2 = new File();
         file2.setFileId("EGAF02");
         file2.setFileName("EGAF02.cip");
-        file2.setFilePath("A/B/D");
+        file2.setDisplayFilePath("A/B/D");
         EgaFile egaFile2 = new EgaFile("EGAF02", file2, null);
 
         List<EgaFile> egaFiles = new ArrayList<>();
@@ -141,10 +141,10 @@ public class EgaDatasetServiceTest {
         EgaFile fileFirst = (EgaFile) thirdDirectoryFirstFile.contents.get(0);
         EgaFile fileSecond = (EgaFile) thirdDirectorySecondFile.contents.get(0);
 
-        assertEquals(file1.getFilePath().split("/")[0], firstDirectory.getName());
-        assertEquals(file1.getFilePath().split("/")[1], secondDirectory.getName());
-        assertEquals(file1.getFilePath().split("/")[2], thirdDirectoryFirstFile.getName());
-        assertEquals(file2.getFilePath().split("/")[2], thirdDirectorySecondFile.getName());
+        assertEquals(file1.getDisplayFilePath().split("/")[0], firstDirectory.getName());
+        assertEquals(file1.getDisplayFilePath().split("/")[1], secondDirectory.getName());
+        assertEquals(file1.getDisplayFilePath().split("/")[2], thirdDirectoryFirstFile.getName());
+        assertEquals(file2.getDisplayFilePath().split("/")[2], thirdDirectorySecondFile.getName());
         assertEquals(egaFile1.getName(), fileFirst.getName());
         assertEquals(egaFile2.getName(), fileSecond.getName());
     }
@@ -156,25 +156,25 @@ public class EgaDatasetServiceTest {
         File file1 = new File();
         file1.setFileId("test");
         file1.setFileName("test.cip");
-        file1.setFilePath("a");
+        file1.setDisplayFilePath("a");
         EgaFile egaFile1 = new EgaFile("test.cip", file1, null);
 
         File file2 = new File();
         file2.setFileId("test2");
         file2.setFileName("test2.cip");
-        file2.setFilePath("a");
+        file2.setDisplayFilePath("a");
         EgaFile egaFile2 = new EgaFile("test2.cip", file2, null);
         
         File file3 = new File();
         file3.setFileId("test");
         file3.setFileName("test.cip");
-        file3.setFilePath("a/b");
+        file3.setDisplayFilePath("a/b");
         EgaFile egaFile3 = new EgaFile("test.cip", file3, null);
 
         File file4 = new File();
         file4.setFileId("test");
         file4.setFileName("test.cip");
-        file4.setFilePath("/test.cip");
+        file4.setDisplayFilePath("/test.cip");
         EgaFile egaFile4 = new EgaFile("test.cip", file4, null);
 
         List<EgaFile> egaFiles = new ArrayList<>();
@@ -194,12 +194,12 @@ public class EgaDatasetServiceTest {
         
         EgaFile thirdDirectoryFirstFile = (EgaFile) secondDirectory.contents.get(0);
 
-        assertEquals(file1.getFilePath().split("/")[0], firstDirectory.getName());
+        assertEquals(file1.getDisplayFilePath().split("/")[0], firstDirectory.getName());
         assertEquals(egaFile1.getName(), secondDirectoryFirstFile.getName());
-        assertEquals(file2.getFilePath().split("/")[0], firstDirectory.getName());
+        assertEquals(file2.getDisplayFilePath().split("/")[0], firstDirectory.getName());
         assertEquals(egaFile2.getName(), secondDirectorySecondFile.getName());        
-        assertEquals(file3.getFilePath().split("/")[0], firstDirectory.getName());
-        assertEquals(file3.getFilePath().split("/")[1], secondDirectory.getName());
+        assertEquals(file3.getDisplayFilePath().split("/")[0], firstDirectory.getName());
+        assertEquals(file3.getDisplayFilePath().split("/")[1], secondDirectory.getName());
         assertEquals(egaFile3.getName(), thirdDirectoryFirstFile.getName());        
         assertEquals(egaFile4.getName(), firstDirectoryFirstFile.getName());
     }
