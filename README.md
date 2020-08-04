@@ -36,11 +36,11 @@ mvn install
 
 Use the command below to run the jar
 ```
-java -jar target/ega-fuse-0.0.1-SNAPSHOT.jar --cf=CREDENTIAL_FILE_PATH
+java -jar target/ega-fuse-client-2.0.0.jar --cf=CREDENTIAL_FILE_PATH
 ```
 or
 ```
-java -jar target/ega-fuse-0.0.1-SNAPSHOT.jar --cf=CREDENTIAL_FILE_PATH --m=MOUNTPOINT_PATH --cache=CACHE_SIZE --c=CONNECTION --cpf=CONNECTION_PER_FILE
+java -jar target/ega-fuse-client-2.0.0.jar --cf=CREDENTIAL_FILE_PATH --m=MOUNTPOINT_PATH --cache=CACHE_SIZE --c=CONNECTION --cpf=CONNECTION_PER_FILE
 ```
 or
 
