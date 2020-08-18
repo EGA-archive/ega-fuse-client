@@ -77,7 +77,7 @@ public class EgaDirectory extends EgaPath {
 
     @Override
     public void getattr(FileStat stat) {
-        stat.st_mode.set(FileStat.S_IFDIR | 0444);
+        stat.st_mode.set(FileStat.S_IFDIR | 0555);
     }
 
     public synchronized void read(Pointer buf, FuseFillDir filler) {
