@@ -44,7 +44,7 @@ java -jar target/ega-fuse-client-2.0.0.jar --cf=CREDENTIAL_FILE_PATH --m=MOUNTPO
 ```
 or
 
-The fuse layer can also be started, stopped and restarted using shell script ./fuseclient.sh as:
+In Linux the fuse layer can also be started, stopped and restarted using shell script ./fuseclient.sh as:
 
 ```
 ./fuseclient.sh start "--cf=CREDENTIAL_FILE_PATH"
