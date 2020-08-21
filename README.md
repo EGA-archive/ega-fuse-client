@@ -1,6 +1,6 @@
 # EGA FUSE Client
 This is a Java Native Runtime (JNR) based Filesystem in Userspace (FUSE) client to access the EGA Data REST API. This client will allow access 
-to authorized EGA Archive files by presenting them in a vitual directory, where they can be used like regular files, 
+to authorized EGA Archive files by presenting them in a virtual directory, where they can be used like regular files, 
 without first having to download them.
 
 ## Prerequisite dependencies
@@ -39,9 +39,8 @@ mvn clean install
 
 ## Run the project
 
-Before running ensure to have `/tmp/mnt` directory created in your local machine
+Before running ensure to `/tmp/mnt` directory exists in your local machine or else create it manually. Then execute the command below to run the project
 
-Use the command below to run the jar
 ```
 java -jar target/ega-fuse-client-2.0.1-SNAPSHOT.jar --cf=CREDENTIAL_FILE_PATH
 ```
