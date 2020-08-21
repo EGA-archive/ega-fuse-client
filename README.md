@@ -6,7 +6,7 @@ without first having to download them.
 ## Prerequisite dependencies
 1. Java
 2. Maven
-3. libfuse for Linux / osxfuse for MacOS
+3. libfuse for Linux / osxfuse for macOS
 
 #### Linux
 
@@ -22,7 +22,7 @@ sudo apt-get install libfuse-dev
 yum install fuse fuse-devel
 ``` 
 
-#### MacOS
+#### macOS
 
 [`osxfuse`](https://osxfuse.github.io) needs to be installed.
 
@@ -64,9 +64,9 @@ The fuse layer can also be started, stopped and restarted using shell script ./f
 ./fuseclient.sh stop
 ```
 
-After running, it will create a virtual directory at MOUNTPOINT_PATH(default path: `/tmp/mnt`). Inside the virtual directory contains the list the datasets and files authorised by the user. The user then can copy those datasets & files into their local directory.
+After running, a virtual directory will be created at the MOUNTPOINT_PATH (default path: /tmp/mnt). This virtual directory will contain your authorised EGA datasets and files.  You can now proceed to copy the datasets of interest into your local directory.
 
-Optional arguments:
+### Optional arguments:
 * m : mount point path, default value: /tmp/mnt `Note: Ensure that the mount point path exists`
 * cache : the maximum size of the cache, default value: 100 `Means 100 * 10 MB = 1000 MB`
 * c : connections, maximum number of API connections used by the application, default value: 4
@@ -81,7 +81,7 @@ password:egarocks
 
 `Note` : If no credential file was provided it will prompt the user for username and password.
 
-### Troubleshoot fuseclient.sh
+## Troubleshoot fuseclient.sh
 Check the log file inside the project directory `fuse-client-logs.log`. If you see any error as `fuse: bad mount point /tmp/mnt: Transport endpoint is not connected.`, try running the command below
 
 #### Linux
@@ -89,7 +89,7 @@ Check the log file inside the project directory `fuse-client-logs.log`. If you s
 umount -l /tmp/mnt
 ```
 
-#### MacOS
+#### macOS
 ```
 umount /tmp/mnt
 ```
@@ -97,5 +97,5 @@ umount /tmp/mnt
 Note: If you have used custom mount point path. Then replace /tmp/mnt with your mount point path directory.
 
 ## Supported platforms
-* Linux(Debian/Fedora)                                                         
-* MacOS (via [osxfuse](https://osxfuse.github.io/))
+* Linux (Debian/Fedora)                                                         
+* macOS (via [osxfuse](https://osxfuse.github.io/))
