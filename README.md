@@ -4,16 +4,22 @@ to authorized EGA Archive files by presenting them in a vitual directory, where 
 without first having to download them.
 
 ## Prerequisite dependencies
-1. Maven
-2. Java
+1. Java
+2. Maven
+3. libfuse for Linux / osxfuse for MacOS
 
 #### Linux
 
 [`libfuse`](https://github.com/libfuse/libfuse) needs to be installed.
 
-#### Ubuntu
+##### Ubuntu
 ```
 sudo apt-get install libfuse-dev
+``` 
+
+##### RedHat
+```
+yum install fuse fuse-devel
 ``` 
 
 #### MacOS
@@ -26,25 +32,28 @@ brew cask install osxfuse
 
 
 ## Build the project
+First, clone the project to your local machine.
 
-To build the project run the command below. It will produce the executable jar file in the /target directory.
+Then to build the project use below command inside the cloned repository. It will produce the executable jar file in the /target directory.
 ```
 mvn clean install
 ```
 
 ## Run the project
 
+Before running ensure to have `/tmp/mnt` directory created in your local machine
+
 Use the command below to run the jar
 ```
-java -jar target/ega-fuse-client-2.0.0.jar --cf=CREDENTIAL_FILE_PATH
+java -jar target/ega-fuse-client-2.0.1-SNAPSHOT.jar --cf=CREDENTIAL_FILE_PATH
 ```
 or
 ```
-java -jar target/ega-fuse-client-2.0.0.jar --cf=CREDENTIAL_FILE_PATH --m=MOUNTPOINT_PATH --cache=CACHE_SIZE --c=CONNECTION --cpf=CONNECTION_PER_FILE
+java -jar target/ega-fuse-client-2.0.1-SNAPSHOT.jar --cf=CREDENTIAL_FILE_PATH --m=MOUNTPOINT_PATH --cache=CACHE_SIZE --c=CONNECTION --cpf=CONNECTION_PER_FILE
 ```
 or
 
-In Linux the fuse layer can also be started, stopped and restarted using shell script ./fuseclient.sh as:
+The fuse layer can also be started, stopped and restarted using shell script ./fuseclient.sh as:
 
 ```
 ./fuseclient.sh start "--cf=CREDENTIAL_FILE_PATH"
@@ -57,6 +66,8 @@ In Linux the fuse layer can also be started, stopped and restarted using shell s
 ``` 
 ./fuseclient.sh stop
 ```
+
+After running, it will create a virtual directory at MOUNTPOINT_PATH(default path: `/tmp/mnt`). Inside the virtual directory contains the list the datasets and files authorised by the user. The user then can copy those datasets & files into their local directory.
 
 Optional arguments:
 * m : mount point path, default value: /tmp/mnt `Note: Ensure that the mount point path exists`
@@ -74,12 +85,20 @@ password:egarocks
 `Note` : If no credential file was provided it will prompt the user for username and password.
 
 ### Troubleshoot fuseclient.sh
-Check the log file fuse-client-logs.log. If you see any error as `fuse: bad mount point /tmp/mnt: Transport endpoint is not connected.`, try running the command below
+Check the log file inside the project directory `fuse-client-logs.log`. If you see any error as `fuse: bad mount point /tmp/mnt: Transport endpoint is not connected.`, try running the command below
 
+#### Linux
 ```
 umount -l /tmp/mnt
 ```
 
+#### MacOS
+```
+umount /tmp/mnt
+```
+
+Note: If you have used custom mount point path. Then replace /tmp/mnt with your mount point path directory.
+
 ## Supported platforms
-* Linux                                                         
+* Linux(Debian/Fedora)                                                         
 * MacOS (via [osxfuse](https://osxfuse.github.io/))
