@@ -32,9 +32,7 @@ brew cask install osxfuse
 
 
 ## Build the project
-First, clone the project to your local machine.
-
-Then to build the project use below command inside the cloned repository. It will produce the executable jar file in the /target directory.
+First, clone the project to your local machine. Then go inside the cloned directory and build the project using the command below. It will produce the executable jar file in the /target directory.
 ```
 mvn clean install
 ```
