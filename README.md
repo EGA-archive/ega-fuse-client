@@ -1,4 +1,4 @@
-# EGA FUSE Client
+# EGA FUSE Client2
 This is a Java Native Runtime (JNR) based Filesystem in Userspace (FUSE) client to access the EGA Data REST API. This client will allow access 
 to authorized EGA Archive files by presenting them in a virtual directory, where they can be used like regular files, 
 without first having to download them.
