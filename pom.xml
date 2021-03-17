@@ -29,9 +29,10 @@
 	</properties>
 
     <repositories>
-        <repository>
-			<id>spring-repo</id>
-			<url>https://repo.spring.io/plugins-release</url>
+		<repository>
+			<id>jcenter</id>
+			<name>jcenter</name>
+			<url>https://jcenter.bintray.com</url>
 		</repository>
     </repositories>
 
