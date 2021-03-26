@@ -64,7 +64,7 @@ case $1 in
         if [ $PROCESSCNT != 0 ]; then
             echo "$SERVICE_NAME stopping ..."
             kill -9 $PID;
-                        sleep 2s
+                        sleep 1s
             echo "$SERVICE_NAME stopped ..."
         else
             echo "$SERVICE_NAME is not running ..."
@@ -74,7 +74,7 @@ case $1 in
         if [ $PROCESSCNT == 0 ]; then
             echo "$SERVICE_NAME stopping ...";
             kill -9 $PID;
-                        sleep 2s
+                        sleep 1s
             echo "$SERVICE_NAME stopped ...";
         else
 			echo "$SERVICE_NAME is not running ..."
