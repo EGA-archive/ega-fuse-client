@@ -59,31 +59,35 @@ yum update
 Checking installation and installing Java, Maven and libfuse (respectively).
 ``` bash
 # Java 
-#! ? 
-#! ?
+java -version 
+yum install java-11-openjdk
 
 # Maven
-#! ? 
-#! ?
+mvn -version
+sudo dnf install maven
 
 # Libfuse
-#! ?
+fusermount -V
 yum install fuse fuse-devel
 ```
 #### 2. macOS
 Run the following command before any installation.
 ``` bash
-#! ?
+softwareupdate -i -r
+```
+Check that the package installer Homebrew is installed:
+``` bash
+brew -v
 ```
 Checking installation and installing Java, Maven and osxfuse (respectively).
 ``` bash
 # Java 
-#! ? 
-#! ?
+java -version
+brew cask install java
 
 # Maven
-#! ? 
-#! ?
+mvn -v
+brew cask install maven
 
 # Osxfuse
 system_profiler -detailLevel mini SPFrameworksDataType
