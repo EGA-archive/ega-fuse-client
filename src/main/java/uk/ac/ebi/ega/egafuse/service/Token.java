@@ -17,16 +17,19 @@
  */
 package uk.ac.ebi.ega.egafuse.service;
 
-import java.io.IOException;
-
 import com.google.api.client.auth.oauth2.PasswordTokenRequest;
 import com.google.api.client.auth.oauth2.TokenResponse;
+import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.api.client.http.BasicAuthentication;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import uk.ac.ebi.ega.egafuse.exception.ClientProtocolException;
 
 public class Token {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Token.class);
     private HttpTransport httpTransport;
     private JsonFactory jsonFactory;
     private String username;
@@ -36,9 +39,9 @@ public class Token {
     private String egaUserGrant;
     private String aaiUrl;
 
-    
+
     public Token(HttpTransport httpTransport, JsonFactory jsonFactory, String username, String password,
-            String egaUserId, String egaUserSecret, String egaUserGrant, String aaiUrl) {
+                 String egaUserId, String egaUserSecret, String egaUserGrant, String aaiUrl) {
         this.httpTransport = httpTransport;
         this.jsonFactory = jsonFactory;
         this.username = username;
@@ -49,12 +52,20 @@ public class Token {
         this.aaiUrl = aaiUrl;
     }
 
-    public String getBearerToken() throws IOException {
-        TokenResponse response = new PasswordTokenRequest(httpTransport, jsonFactory,
-                new GenericUrl(aaiUrl.concat("/token")), username, password).setGrantType(egaUserGrant)
-                        .setClientAuthentication(new BasicAuthentication(egaUserId, egaUserSecret)).execute();
+    public String getBearerToken() throws ClientProtocolException {
+        try {
+            TokenResponse response = new PasswordTokenRequest(httpTransport, jsonFactory,
+                    new GenericUrl(aaiUrl.concat("/token")), username, password).setGrantType(egaUserGrant)
+                    .setClientAuthentication(new BasicAuthentication(egaUserId, egaUserSecret)).execute();
 
-        return response.getAccessToken();
+            return response.getAccessToken();
+        } catch (TokenResponseException e) {
+            LOGGER.error(e.getMessage());
+            throw new ClientProtocolException("Invalid user credential provided. ", e);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            throw new ClientProtocolException("Error in get token. ", e);
+        }
     }
 
 }
