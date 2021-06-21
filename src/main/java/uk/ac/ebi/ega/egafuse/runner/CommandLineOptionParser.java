@@ -78,15 +78,14 @@ public class CommandLineOptionParser {
 
     public static OptionParser buildParser() {
         OptionParser parser = new OptionParser();
-        parser.mutuallyExclusive(parser.accepts("u"), parser.accepts("cf"));
         parser.accepts("cf",
                 "credential file path containing username & password, e.g. \n username:user1 \n  password:pass")
                 .withRequiredArg().withValuesConvertedBy(new PathConverter());
-        parser.accepts("c", "connections").withRequiredArg().ofType(Integer.class).defaultsTo(4);
+        parser.accepts("c", "maximum number of API connections used by the application").withRequiredArg().ofType(Integer.class).defaultsTo(4);
         parser.accepts("cpf", "connections per file").withRequiredArg().ofType(Integer.class).defaultsTo(2);
-        parser.accepts("t", "tree structure").withRequiredArg().defaultsTo(ENABLE);
-        parser.accepts("cache", "max cache").withRequiredArg().ofType(Integer.class).defaultsTo(100);
-        parser.accepts("m", "mount path").withRequiredArg().withValuesConvertedBy(new PathConverter())
+        parser.accepts("t", "toggle tree structure").withRequiredArg().defaultsTo(ENABLE);
+        parser.accepts("cache", "the maximum size of the cache").withRequiredArg().ofType(Integer.class).defaultsTo(100);
+        parser.accepts("m", "mount point path").withRequiredArg().withValuesConvertedBy(new PathConverter())
                 .defaultsTo(Paths.get("/tmp/mnt"));
         parser.accepts(OPTIONS_HELP, "Use this option to get help");
         parser.allowsUnrecognizedOptions();

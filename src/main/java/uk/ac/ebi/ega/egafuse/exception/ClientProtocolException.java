@@ -21,4 +21,8 @@ public class ClientProtocolException extends Exception {
     public ClientProtocolException(final String message) {
         super(message);
     }
+
+    public ClientProtocolException(final String message, final Exception e) {
+        super(message, e);
+    }
 }

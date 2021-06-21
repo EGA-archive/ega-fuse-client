@@ -65,7 +65,7 @@ public class EgaDatasetService implements IEgaDatasetService {
                 throw e;
             }
         } catch (Exception e) {
-            LOGGER.error("Error in get dataset - {}", e.getMessage(), e);
+            LOGGER.error("Error in get dataset - {}", e.getMessage());
         }
         return Collections.emptyList();
     }
