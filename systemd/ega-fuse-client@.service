@@ -1,0 +1,18 @@
+[Unit]
+Description=EGA Fuse Client for %I mount.
+After=remote-fs.target
+Requires=remote-fs.target
+
+[Service]
+TimeoutStartSec=0
+EnvironmentFile=/etc/ega-fuse-client.d/%i.env
+SuccessExitStatus=143
+
+ExecStart=/usr/bin/env "${EGA_FUSE_CLIENT_JAVA_HOME}/bin/java" \
+-Xmx4g \
+-jar /usr/local/ega-fuse-client/ega-fuse-client.jar \
+-cf "/etc/ega-fuse-client.d/%i.cf" \
+-m "${EGA_FUSE_CLIENT_MOUNTPOINT}"
+
+[Install]
+WantedBy=multi-user.target

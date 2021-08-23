@@ -10,16 +10,21 @@
 
 	<groupId>uk.ac.ebi.ega</groupId>
 	<artifactId>ega-fuse-client</artifactId>
-	<version>2.1.1-SNAPSHOT</version>
+	<version>2.1.0</version>
 	<packaging>jar</packaging>
 	<name>ega-fuse</name>
 	<description>ega fuse client</description>
+	<url>https://github.com/EGA-archive/ega-fuse-client</url>
+	<organization>
+		<name>The European Genome-phenome Archive (EGA)</name>
+		<url>https://ega-archive.org/</url>
+	</organization>
 
-    <scm>
-        <developerConnection>scm:git:git@github.com:EGA-archive/ega-fuse-client.git</developerConnection>
-        <tag>2.0.0</tag>
-    </scm>
-    
+	<scm>
+		<developerConnection>scm:git:git@github.com:EGA-archive/ega-fuse-client.git</developerConnection>
+		<tag>2.0.0</tag>
+	</scm>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -28,13 +33,13 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
 
-    <repositories>
+	<repositories>
 		<repository>
 			<id>jcenter</id>
 			<name>jcenter</name>
 			<url>https://jcenter.bintray.com</url>
 		</repository>
-    </repositories>
+	</repositories>
 
 	<dependencies>
 		<dependency>
@@ -73,8 +78,8 @@
 			<artifactId>spring-boot-starter-cache</artifactId>
 		</dependency>
 		<dependency>
-		    <groupId>com.github.ben-manes.caffeine</groupId>
-		    <artifactId>caffeine</artifactId>
+			<groupId>com.github.ben-manes.caffeine</groupId>
+			<artifactId>caffeine</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -86,10 +91,10 @@
 			<version>3.4.2</version>
 		</dependency>
 		<dependency>
-		    <groupId>com.github.stefanbirkner</groupId>
-		    <artifactId>system-rules</artifactId>
-		    <version>1.19.0</version>
-		    <scope>test</scope>
+			<groupId>com.github.stefanbirkner</groupId>
+			<artifactId>system-rules</artifactId>
+			<version>1.19.0</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.google.api-client</groupId>
@@ -110,7 +115,7 @@
 			<version>1.2.1</version>
 		</dependency>
 	</dependencies>
-	
+
 	<build>
 		<plugins>
 			<plugin>
@@ -126,12 +131,87 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <configuration>
-                    <tagNameFormat>@{project.version}</tagNameFormat>
-                </configuration>
-            </plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<configuration>
+					<tagNameFormat>@{project.version}</tagNameFormat>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>de.dentrassi.maven</groupId>
+				<artifactId>rpm</artifactId>
+				<version>1.6.0</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>rpm</goal>
+						</goals>
+						<configuration>
+							<attach>false</attach> 
+							<group>Application/Misc</group>
+							<skipSigning>true</skipSigning>
+							<prerequisites>
+								<dependency>
+									<name>java-11-openjdk</name>
+								</dependency>
+							</prerequisites>
+							<entries>
+								<entry>
+									<name>/usr/local/${project.artifactId}</name>
+									<directory>true</directory>
+									<user>root</user>
+									<group>root</group>
+									<mode>0755</mode>
+								</entry>
+								<entry>
+									<name>/usr/local/${project.artifactId}/${project.artifactId}-${project.version}.jar</name>
+									<file>target/${project.artifactId}-${project.version}.jar</file>
+									<user>root</user>
+									<group>root</group>
+									<mode>0644</mode>
+								</entry>
+								<entry>
+									<name>/usr/local/${project.artifactId}/${project.artifactId}.jar</name>
+									<linkTo>${project.artifactId}-${project.version}.jar</linkTo>
+									<user>root</user>
+									<group>root</group>
+								</entry>
+								<entry>
+									<name>/etc/${project.artifactId}.d/</name>
+									<directory>true</directory>
+									<user>root</user>
+									<group>root</group>
+									<mode>0750</mode>
+								</entry>
+								<entry>
+									<name>/etc/${project.artifactId}.d/${project.artifactId}.env.example</name>
+									<file>systemd/${project.artifactId}.env.example</file>
+									<user>root</user>
+									<group>root</group>
+									<mode>0640</mode>
+									<documentation>true</documentation>
+								</entry>
+								<entry>
+									<name>/etc/${project.artifactId}.d/${project.artifactId}.cf.example</name>
+									<file>systemd/${project.artifactId}.cf.example</file>
+									<user>root</user>
+									<group>root</group>
+									<mode>0640</mode>
+									<documentation>true</documentation>
+								</entry>
+								<entry>
+									<name>/usr/lib/systemd/system/${project.artifactId}@.service</name>
+									<file>systemd/${project.artifactId}@.service</file>
+									<user>root</user>
+									<group>root</group>
+									<mode>0644</mode>
+									<configuration>true</configuration>
+								</entry>
+							</entries>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 </project>
