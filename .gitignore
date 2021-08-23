@@ -37,3 +37,6 @@ hs_err_pid*
 
 # Maven
 .mvn/*
+
+# Markdown previews.
+*.md.html
