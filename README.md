@@ -80,7 +80,7 @@ Check that the package installer Homebrew is installed:
 ``` bash
 brew -v
 ```
-Checking installation and installing Java, Maven and osxfuse (respectively).
+Checking installation and installing Java, Maven and osxfuse or macfuse (respectively).
 ``` bash
 # Java 
 java -version
