@@ -84,15 +84,15 @@ Checking installation and installing Java, Maven and osxfuse (respectively).
 ``` bash
 # Java 
 java -version
-brew cask install java
+brew install java
 
 # Maven
 mvn -v
-brew cask install maven
+brew install maven
 
 # Osxfuse
 system_profiler -detailLevel mini SPFrameworksDataType
-brew cask install osxfuse
+brew install --cask osxfuse
 
 # macfuse
 brew install --cask macfuse
