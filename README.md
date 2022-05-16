@@ -184,16 +184,21 @@ cd EGAZ00001698357/
 ls 
 ````
 Within this folder we have full access to the file `HG01775.chrY.bcf` and its index ``HG01775.chrY.bcf.csi``. At this point we can do anything with them. For instance: 
+
 * Copying/moving this file to our local machine.
 ````bash
 cp HG01775.chrY.bcf.csi LOCAL_PATH/
 ````
-* Using locally installed tools (e.g. bcftools, samtools, etc.) to visualise/edit these files.
+* Using locally installed tools (e.g. bcftools, samtools) to view these files.
 ````bash
 bcftools view HG01775.chrY.bcf | head
 ````
+* Using locally installed tools (e.g. bcftools, samtools) to analyze these files.
+````bash
+bcftools stats HG01775.chrY.bcf
+````
 
-Please note that, since the client downloads the files you make use of on *the fly*, commands involving large files **may take some time** to be executed. 
+Please note that since the client downloads the files you make use of on *the fly*, commands involving large files **may take some time** to be executed. 
 
 ## Common issues and troubleshooting
 
