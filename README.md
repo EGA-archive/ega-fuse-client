@@ -22,8 +22,9 @@ This tool was programmed in Java, and depends on the following software:
 | [Maven](https://maven.apache.org/)  | Apache Maven 3.6.3 | Linux and macOS |
 | [libfuse](https://github.com/libfuse/libfuse) | libfuse-dev 2.9.9-3 | Linux |
 | [osxfuse](https://osxfuse.github.io/) | 3.11.2 | macOS |
+| [macfuse](https://osxfuse.github.io/) | 4.2.5 | macOS |
 
-Column "Tested version" represents each software's version used on our latest tests, serving as a reference. Nevertheless, we encourage you to download their current version and check its functionality.
+Column "Tested version" represents each software's version used on our latest tests, serving as a reference. Nevertheless, we encourage you to download their current version and check its functionality. Please note that newer MacOS versions (e.g. Monterey) might require macfuse instead of osxfuse.
 
 ### Installing dependencies
 
@@ -92,6 +93,9 @@ brew cask install maven
 # Osxfuse
 system_profiler -detailLevel mini SPFrameworksDataType
 brew cask install osxfuse
+
+# macfuse
+brew install --cask macfuse
 ```
 
 ## Building the project
