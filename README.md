@@ -116,17 +116,17 @@ The virtual directory in which files will be stored by default is `/tmp/mnt`, an
 
 At this point, we are ready to run the project. To do so we simply need to run the `ega-fuse-client-<version>-SNAPSHOT.jar` file we just created within the `target/` directory. This executable file accepts several [optional arguments](#Optional-arguments), which can be displayed running: 
 ``` bash
-java -jar target/ega-fuse-client-2.0.1-SNAPSHOT.jar --h
+java -jar target/ega-fuse-client-2.1.1-SNAPSHOT.jar --h
 ```
 
 As we mentioned before, the only datasets that will appear in the mounted directory `/tmp/mnt` are the ones we have access to (i.e. we have been authorised), so we need to provide our credentials to the fuse-client. These credentials are the same ones you use to download datafiles through the EGA download client [PyEGA3](https://github.com/EGA-archive/ega-download-client). We can either:
 1. Run the command without giving a credentials file (we will be asked to write our credentials in the terminal)
 ````
-java -jar target/ega-fuse-client-2.0.1-SNAPSHOT.jar
+java -jar target/ega-fuse-client-2.1.1-SNAPSHOT.jar
 ````
 2. Run the command handing over such file with our credentials (its format can be found in the [optional arguments](#Optional-arguments) section). For the sake of testing, there is an existing ``test_credentials.txt`` file you can use, which should be replaced with your own credentials file. 
 ```
-java -jar target/ega-fuse-client-2.0.1-SNAPSHOT.jar --cf='test_credentials.txt'
+java -jar target/ega-fuse-client-2.1.1-SNAPSHOT.jar --cf='test_credentials.txt'
 ```
 
 Additionally, instead of running the `.jar` file yourself, you can make use of the ``fuseclient.sh`` script. This script will manage the execution of the ``.jar`` file and can be used to start, stop or restart it. All additional arguments can be given as a block between brackets (e.g. `"--cf=test_credentials --m=/tmp/mnt ..."`). 
@@ -160,7 +160,7 @@ password:egarocks
 
 Example of usage (replace these ``<arguments>`` with your own values):
 ```
-java -jar target/ega-fuse-client-2.0.1-SNAPSHOT.jar --cf=<CREDENTIAL_FILE_PATH> --m=<MOUNTPOINT_PATH> --cache=<CACHE_SIZE> --c=<CONNECTION> --cpf=<CONNECTION_PER_FILE>
+java -jar target/ega-fuse-client-2.1.1-SNAPSHOT.jar --cf=<CREDENTIAL_FILE_PATH> --m=<MOUNTPOINT_PATH> --cache=<CACHE_SIZE> --c=<CONNECTION> --cpf=<CONNECTION_PER_FILE>
 ```
 
 ## Making use of the mounted environment
