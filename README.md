@@ -1,5 +1,5 @@
 # EGA FUSE Client
-This repository contains a Java Native Runtime (JNR) based Filesystem in Userspace (FUSE) client to access the EGA Data REST API. Such FUSE client will allow access to authorized EGA-Archive files by presenting them in a virtual directory, where they can be used like regular files, without first having to download them.
+This repository contains a Java Native Runtime (JNR) based Filesystem in Userspace (FUSE) client to access the EGA Data REST API. Such FUSE client will allow access to authorized EGA files by presenting them in a virtual directory, where they can be used like regular files, without first having to download them.
 ## Index
 * [Supported platforms](#Supported-platforms)
 * [Prerequisites and dependencies](#Prerequisites-and-dependencies)
@@ -10,7 +10,7 @@ This repository contains a Java Native Runtime (JNR) based Filesystem in Userspa
 
 ## Supported platforms
 * Linux (Debian/Fedora)                                                         
-* macOS (via [osxfuse](https://osxfuse.github.io/))
+* macOS (via [osxfuse/macfuse](https://osxfuse.github.io/))
 * Windows (via Windows Subsystem for Linux version 2 - [WSL2](https://codefellows.github.io/setup-guide/windows/))
 
 ## Prerequisites and dependencies
@@ -28,7 +28,7 @@ Column "Tested version" represents each software's version used on our latest te
 
 ### Installing dependencies
 
-Herebelow you can find commands to **check** if the dependencies have already been installed, and **how to install** them if not. For each of them, the first command should prompt the version of the installed dependency. If not installed, run its second command to install it. 
+Below you can find commands to check if the dependencies have already been installed, and, if not, how to install them. For each of them, the first command should prompt the version of the installed dependency. If not installed, run the second command to install it. 
 
 #### 1. Linux
 Depending on your Linux distribution (Ubuntu or RedHat) use its corresponding commands.
@@ -80,7 +80,7 @@ Check that the package installer Homebrew is installed:
 ``` bash
 brew -v
 ```
-Checking installation and installing Java, Maven and osxfuse or macfuse (respectively).
+Checking installation and installing Java, Maven and osxfuse or macfuse (respectively). Depending on the MacOS version you are using, you will either need osxfuse or macfuse.
 ``` bash
 # Java 
 java -version
@@ -94,7 +94,7 @@ brew install maven
 system_profiler -detailLevel mini SPFrameworksDataType
 brew install --cask osxfuse
 
-# macfuse
+# Macfuse
 brew install --cask macfuse
 ```
 
