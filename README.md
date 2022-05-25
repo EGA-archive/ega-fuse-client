@@ -1,5 +1,5 @@
 # EGA FUSE Client
-This repository contains a Java Native Runtime (JNR) based Filesystem in Userspace (FUSE) client to access the EGA Data REST API. Such FUSE client will allow access to authorized EGA-Archive files by presenting them in a virtual directory, where they can be used like regular files, without first having to download them.
+This repository contains a Java Native Runtime (JNR) based Filesystem in Userspace (FUSE) client to access the EGA Data REST API. Such FUSE client will allow access to authorized EGA files by presenting them in a virtual directory, where they can be used like regular files, without first having to download them.
 ## Index
 * [Supported platforms](#Supported-platforms)
 * [Prerequisites and dependencies](#Prerequisites-and-dependencies)
@@ -10,7 +10,7 @@ This repository contains a Java Native Runtime (JNR) based Filesystem in Userspa
 
 ## Supported platforms
 * Linux (Debian/Fedora)                                                         
-* macOS (via [osxfuse](https://osxfuse.github.io/))
+* macOS (via [osxfuse/macfuse](https://osxfuse.github.io/))
 * Windows (via Windows Subsystem for Linux version 2 - [WSL2](https://codefellows.github.io/setup-guide/windows/))
 
 ## Prerequisites and dependencies
@@ -22,12 +22,13 @@ This tool was programmed in Java, and depends on the following software:
 | [Maven](https://maven.apache.org/)  | Apache Maven 3.6.3 | Linux and macOS |
 | [libfuse](https://github.com/libfuse/libfuse) | libfuse-dev 2.9.9-3 | Linux |
 | [osxfuse](https://osxfuse.github.io/) | 3.11.2 | macOS |
+| [macfuse](https://osxfuse.github.io/) | 4.2.5 | macOS |
 
-Column "Tested version" represents each software's version used on our latest tests, serving as a reference. Nevertheless, we encourage you to download their current version and check its functionality.
+Column "Tested version" represents each software's version used on our latest tests, serving as a reference. Nevertheless, we encourage you to download their current version and check its functionality. Please note that newer MacOS versions (e.g. Monterey) might require macfuse instead of osxfuse.
 
 ### Installing dependencies
 
-Herebelow you can find commands to **check** if the dependencies have already been installed, and **how to install** them if not. For each of them, the first command should prompt the version of the installed dependency. If not installed, run its second command to install it. 
+Below you can find commands to check if the dependencies have already been installed, and, if not, how to install them. For each of them, the first command should prompt the version of the installed dependency. If not installed, run the second command to install it. 
 
 #### 1. Linux
 Depending on your Linux distribution (Ubuntu or RedHat) use its corresponding commands.
@@ -79,19 +80,22 @@ Check that the package installer Homebrew is installed:
 ``` bash
 brew -v
 ```
-Checking installation and installing Java, Maven and osxfuse (respectively).
+Checking installation and installing Java, Maven and osxfuse or macfuse (respectively). Depending on the MacOS version you are using, you will either need osxfuse or macfuse.
 ``` bash
 # Java 
 java -version
-brew cask install java
+brew install java
 
 # Maven
 mvn -v
-brew cask install maven
+brew install maven
 
 # Osxfuse
 system_profiler -detailLevel mini SPFrameworksDataType
-brew cask install osxfuse
+brew install --cask osxfuse
+
+# Macfuse
+brew install --cask macfuse
 ```
 
 ## Building the project
@@ -112,17 +116,17 @@ The virtual directory in which files will be stored by default is `/tmp/mnt`, an
 
 At this point, we are ready to run the project. To do so we simply need to run the `ega-fuse-client-<version>-SNAPSHOT.jar` file we just created within the `target/` directory. This executable file accepts several [optional arguments](#Optional-arguments), which can be displayed running: 
 ``` bash
-java -jar target/ega-fuse-client-2.0.1-SNAPSHOT.jar --h
+java -jar target/ega-fuse-client-2.1.1-SNAPSHOT.jar --h
 ```
 
 As we mentioned before, the only datasets that will appear in the mounted directory `/tmp/mnt` are the ones we have access to (i.e. we have been authorised), so we need to provide our credentials to the fuse-client. These credentials are the same ones you use to download datafiles through the EGA download client [PyEGA3](https://github.com/EGA-archive/ega-download-client). We can either:
 1. Run the command without giving a credentials file (we will be asked to write our credentials in the terminal)
 ````
-java -jar target/ega-fuse-client-2.0.1-SNAPSHOT.jar
+java -jar target/ega-fuse-client-2.1.1-SNAPSHOT.jar
 ````
 2. Run the command handing over such file with our credentials (its format can be found in the [optional arguments](#Optional-arguments) section). For the sake of testing, there is an existing ``test_credentials.txt`` file you can use, which should be replaced with your own credentials file. 
 ```
-java -jar target/ega-fuse-client-2.0.1-SNAPSHOT.jar --cf='test_credentials.txt'
+java -jar target/ega-fuse-client-2.1.1-SNAPSHOT.jar --cf='test_credentials.txt'
 ```
 
 Additionally, instead of running the `.jar` file yourself, you can make use of the ``fuseclient.sh`` script. This script will manage the execution of the ``.jar`` file and can be used to start, stop or restart it. All additional arguments can be given as a block between brackets (e.g. `"--cf=test_credentials --m=/tmp/mnt ..."`). 
@@ -156,7 +160,7 @@ password:egarocks
 
 Example of usage (replace these ``<arguments>`` with your own values):
 ```
-java -jar target/ega-fuse-client-2.0.1-SNAPSHOT.jar --cf=<CREDENTIAL_FILE_PATH> --m=<MOUNTPOINT_PATH> --cache=<CACHE_SIZE> --c=<CONNECTION> --cpf=<CONNECTION_PER_FILE>
+java -jar target/ega-fuse-client-2.1.1-SNAPSHOT.jar --cf=<CREDENTIAL_FILE_PATH> --m=<MOUNTPOINT_PATH> --cache=<CACHE_SIZE> --c=<CONNECTION> --cpf=<CONNECTION_PER_FILE>
 ```
 
 ## Making use of the mounted environment
@@ -180,16 +184,21 @@ cd EGAZ00001698357/
 ls 
 ````
 Within this folder we have full access to the file `HG01775.chrY.bcf` and its index ``HG01775.chrY.bcf.csi``. At this point we can do anything with them. For instance: 
+
 * Copying/moving this file to our local machine.
 ````bash
 cp HG01775.chrY.bcf.csi LOCAL_PATH/
 ````
-* Using locally installed tools (e.g. bcftools, samtools, etc.) to visualise/edit these files.
+* Using locally installed tools (e.g. bcftools, samtools) to view these files.
 ````bash
 bcftools view HG01775.chrY.bcf | head
 ````
+* Using locally installed tools (e.g. bcftools, samtools) to analyze these files.
+````bash
+bcftools stats HG01775.chrY.bcf
+````
 
-Please note that, since the client downloads the files you make use of on *the fly*, commands involving large files **may take some time** to be executed. 
+Please note that since the client downloads the files you make use of on *the fly*, commands involving large files **may take some time** to be executed. 
 
 ## Common issues and troubleshooting
 
