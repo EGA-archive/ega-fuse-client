@@ -17,23 +17,23 @@
  */
 package uk.ac.ebi.ega.egafuse.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import uk.ac.ebi.ega.egafuse.exception.ClientProtocolException;
+import uk.ac.ebi.ega.egafuse.model.Dataset;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import uk.ac.ebi.ega.egafuse.exception.ClientProtocolException;
+import java.util.stream.Collectors;
 
 public class EgaDatasetService implements IEgaDatasetService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EgaDatasetService.class);
@@ -74,18 +74,19 @@ public class EgaDatasetService implements IEgaDatasetService {
             throws IOException, ClientProtocolException {
         final int status = response.code();
         switch (status) {
-        case 200:
-            List<String> datasets = mapper.readValue(response.body().string(), new TypeReference<List<String>>() {
-            });
-            List<EgaDirectory> egaDirectorys = new ArrayList<>();
-            for (String dataset : datasets) {
-                EgaDirectory egaDirectory = new EgaDirectory(dataset, this, egaFileService);
-                egaDirectorys.add(egaDirectory);
-            }
-            return egaDirectorys;
-        default:
-            LOGGER.error("status: {}", status);
-            throw new ClientProtocolException(response.body().string());
+            case 200:
+                List<Dataset> datasets = mapper.readValue(response.body().string(), new TypeReference<List<Dataset>>() {
+                });
+                List<String> datasetIds = datasets.stream().map(dataset -> dataset.getDatasetId()).collect(Collectors.toList());
+                List<EgaDirectory> egaDirectories = new ArrayList<>();
+                for (String dataset : datasetIds) {
+                    EgaDirectory egaDirectory = new EgaDirectory(dataset, this, egaFileService);
+                    egaDirectories.add(egaDirectory);
+                }
+                return egaDirectories;
+            default:
+                LOGGER.error("status: {}", status);
+                throw new ClientProtocolException(response.body().string());
         }
     }
 
@@ -96,7 +97,7 @@ public class EgaDatasetService implements IEgaDatasetService {
         for (EgaFile egaFile : egaFiles) {
             EgaDirectory currentDirectory = null;
             String filePath = recreateFilePath(egaFile.getFile().getDisplayFilePath().trim());
-                    
+
             // if file does not have any directory
             if (filePath.endsWith(".cip")) {
                 filePathDirectory.put(filePath, datasetRootNode);
@@ -113,19 +114,19 @@ public class EgaDatasetService implements IEgaDatasetService {
             }
         }
     }
-    
+
     private String recreateFilePath(String filePath) {
         String pathSoFar = "";
-        for(String subPath: filePath.split("/")) {
-            if(!subPath.trim().isEmpty()) {
+        for (String subPath : filePath.split("/")) {
+            if (!subPath.trim().isEmpty()) {
                 pathSoFar = pathSoFar.isEmpty() ? subPath.trim() : pathSoFar.concat("/").concat(subPath.trim());
-            }            
+            }
         }
         return pathSoFar;
     }
 
     private void createSubDirectory(String filePath, Map<String, EgaDirectory> filePathDirectory,
-            EgaDirectory currentDirectory, EgaDirectory datasetRootNode, EgaFile egaFile) {
+                                    EgaDirectory currentDirectory, EgaDirectory datasetRootNode, EgaFile egaFile) {
         String subPaths[] = filePath.split("/");
         String pathSoFar = "";
         EgaDirectory subPathDirectory = null;

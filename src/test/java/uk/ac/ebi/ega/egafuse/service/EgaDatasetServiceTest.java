@@ -17,13 +17,10 @@
  */
 package uk.ac.ebi.ega.egafuse.service;
 
-import static okhttp3.mock.Behavior.UNORDERED;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.List;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import okhttp3.OkHttpClient;
+import okhttp3.mock.MockInterceptor;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,14 +29,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import okhttp3.OkHttpClient;
-import okhttp3.mock.MockInterceptor;
 import uk.ac.ebi.ega.egafuse.config.EgaFuseApplicationConfig;
+import uk.ac.ebi.ega.egafuse.model.Dataset;
 import uk.ac.ebi.ega.egafuse.model.File;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static okhttp3.mock.Behavior.UNORDERED;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @TestPropertySource("classpath:application-test.properties")
 @ContextConfiguration(classes = EgaFuseApplicationConfig.class)
@@ -68,15 +68,19 @@ public class EgaDatasetServiceTest {
 
     @Test
     public void getDatasets_WhenGivenDataset_ThenReturnsDatasets() throws JsonProcessingException {
-        List<String> dataset = new ArrayList<String>();
-        dataset.add("EGAD00001");
-        dataset.add("EGAD00002");
+        List<String> datasetIds = new ArrayList<String>();
+        datasetIds.add("EGAD00001");
+        datasetIds.add("EGAD00002");
+        ObjectMapper mapper = new ObjectMapper();
+        List<Dataset> datasetList = datasetIds.stream()
+                .map(datasetId -> new Dataset(datasetId, "desc", datasetId))
+                .collect(Collectors.toList());
         interceptor.addRule().get(APP_URL + "/metadata/datasets")
-                .respond(new ObjectMapper().writeValueAsString(dataset));
+                .respond(mapper.writeValueAsString(datasetList));
 
         List<EgaDirectory> userDataset = egaDatasetService.getDatasets();
-        assertEquals(dataset.get(0), userDataset.get(0).getName());
-        assertEquals(dataset.get(1), userDataset.get(1).getName());
+        assertEquals(datasetIds.get(0), userDataset.get(0).getName());
+        assertEquals(datasetIds.get(1), userDataset.get(1).getName());
     }
 
     @Test
@@ -164,7 +168,7 @@ public class EgaDatasetServiceTest {
         file2.setFileName("test2.cip");
         file2.setDisplayFilePath("a");
         EgaFile egaFile2 = new EgaFile("test2.cip", file2, null);
-        
+
         File file3 = new File();
         file3.setFileId("test");
         file3.setFileName("test.cip");
@@ -185,22 +189,22 @@ public class EgaDatasetServiceTest {
 
         egaDatasetService.buildSubDirectoryFromFilePath(egaFiles, egaParentdirectory);
 
-        EgaDirectory firstDirectory = (EgaDirectory) egaParentdirectory.contents.get(0);  
-        EgaFile firstDirectoryFirstFile = (EgaFile) egaParentdirectory.contents.get(1);      
-        
+        EgaDirectory firstDirectory = (EgaDirectory) egaParentdirectory.contents.get(0);
+        EgaFile firstDirectoryFirstFile = (EgaFile) egaParentdirectory.contents.get(1);
+
         EgaFile secondDirectoryFirstFile = (EgaFile) firstDirectory.contents.get(0);
         EgaFile secondDirectorySecondFile = (EgaFile) firstDirectory.contents.get(1);
         EgaDirectory secondDirectory = (EgaDirectory) firstDirectory.contents.get(2);
-        
+
         EgaFile thirdDirectoryFirstFile = (EgaFile) secondDirectory.contents.get(0);
 
         assertEquals(file1.getDisplayFilePath().split("/")[0], firstDirectory.getName());
         assertEquals(egaFile1.getName(), secondDirectoryFirstFile.getName());
         assertEquals(file2.getDisplayFilePath().split("/")[0], firstDirectory.getName());
-        assertEquals(egaFile2.getName(), secondDirectorySecondFile.getName());        
+        assertEquals(egaFile2.getName(), secondDirectorySecondFile.getName());
         assertEquals(file3.getDisplayFilePath().split("/")[0], firstDirectory.getName());
         assertEquals(file3.getDisplayFilePath().split("/")[1], secondDirectory.getName());
-        assertEquals(egaFile3.getName(), thirdDirectoryFirstFile.getName());        
+        assertEquals(egaFile3.getName(), thirdDirectoryFirstFile.getName());
         assertEquals(egaFile4.getName(), firstDirectoryFirstFile.getName());
     }
 }
