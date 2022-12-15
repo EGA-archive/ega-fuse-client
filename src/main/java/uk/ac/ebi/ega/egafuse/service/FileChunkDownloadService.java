@@ -17,22 +17,19 @@
  */
 package uk.ac.ebi.ega.egafuse.service;
 
-import java.io.DataInputStream;
-import java.io.IOException;
-
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import com.google.common.io.CountingInputStream;
-
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import uk.ac.ebi.ega.egafuse.exception.ClientProtocolException;
 import uk.ac.ebi.ega.egafuse.model.CacheKey;
+
+import java.io.DataInputStream;
+import java.io.IOException;
 
 public class FileChunkDownloadService implements IFileChunkDownloadService {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileChunkDownloadService.class);
@@ -46,25 +43,25 @@ public class FileChunkDownloadService implements IFileChunkDownloadService {
         this.token = token;
     }
 
-    @Retryable(value = {IOException.class, ClientProtocolException.class}, maxAttemptsExpression = "${connection.maxAttempts}", 
+    @Retryable(value = {IOException.class, ClientProtocolException.class}, maxAttemptsExpression = "${connection.maxAttempts}",
             backoff = @Backoff(delayExpression = "${connection.backoff}"))
     public byte[] downloadChunk(CacheKey cacheKey) throws IOException, ClientProtocolException {
         long startCoordinate = cacheKey.getStartCoordinate();
         long bytesToRead = cacheKey.getChunkBytesToRead();
-       
-        UriComponentsBuilder builder =  UriComponentsBuilder.fromPath(apiURL
-                                                            .concat("/files/"))
-                                                            .path(cacheKey.getFileId())
-                                                            .queryParam("destinationFormat", "plain")
-                                                            .queryParam("startCoordinate", startCoordinate)
-                                                            .queryParam("endCoordinate", (startCoordinate + bytesToRead));
+        long endCoordinate = startCoordinate + bytesToRead;
+
+        UriComponentsBuilder builder = UriComponentsBuilder.fromPath(apiURL
+                        .concat("/files/"))
+                .path(cacheKey.getFileId())
+                .queryParam("destinationFormat", "plain");
 
         LOGGER.info("url = " + builder.toUriString());
 
         Request fileRequest;
         try {
-            fileRequest = new Request.Builder().url(builder.toUriString()).addHeader("Authorization",
-                    "Bearer " + token.getBearerToken())
+            fileRequest = new Request.Builder().url(builder.toUriString())
+                    .addHeader("Authorization", "Bearer " + token.getBearerToken())
+                    .addHeader("Range", "bytes= " + startCoordinate + "-" + (endCoordinate - 1))
                     .build();
             try (Response response = okHttpClient.newCall(fileRequest).execute()) {
                 return buildResponseDownloadFiles(response, bytesToRead);
@@ -83,16 +80,16 @@ public class FileChunkDownloadService implements IFileChunkDownloadService {
             throws IOException, ClientProtocolException {
         final int status = response.code();
         switch (status) {
-        case 200:
-        case 206:
-            byte[] buffer = new byte[(int) bytesToRead];
-            try (DataInputStream dis = new DataInputStream(response.body().byteStream())) {
-                dis.readFully(buffer);
-            }
-            return buffer;
-        default:
-            LOGGER.error("status: {}", status);
-            throw new ClientProtocolException(response.body().string());
+            case 200:
+            case 206:
+                byte[] buffer = new byte[(int) bytesToRead];
+                try (DataInputStream dis = new DataInputStream(response.body().byteStream())) {
+                    dis.readFully(buffer);
+                }
+                return buffer;
+            default:
+                LOGGER.error("status: {}", status);
+                throw new ClientProtocolException(response.body().string());
         }
     }
 }
