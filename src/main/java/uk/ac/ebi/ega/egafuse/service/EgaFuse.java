@@ -17,35 +17,40 @@
  */
 package uk.ac.ebi.ega.egafuse.service;
 
-import java.nio.file.Paths;
-
 import jnr.ffi.Pointer;
 import jnr.ffi.types.off_t;
 import jnr.ffi.types.size_t;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.serce.jnrfuse.ErrorCodes;
 import ru.serce.jnrfuse.FuseFillDir;
 import ru.serce.jnrfuse.FuseStubFS;
 import ru.serce.jnrfuse.struct.FileStat;
 import ru.serce.jnrfuse.struct.FuseFileInfo;
 
+import java.nio.file.Paths;
+
 public class EgaFuse extends FuseStubFS {
     private String mountPath;
     private EgaDirectory rootDirectory;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EgaFuse.class);
 
     public EgaFuse(EgaDirectory rootDirectory, String mountPath) {
         this.rootDirectory = rootDirectory;
         this.mountPath = mountPath;
     }
-    
+
     public void start() {
         try {
-            String[] args_ = new String[] { "-o", "allow_other" };
+            String[] args_ = new String[]{"-o", "allow_other"};
+            LOGGER.info("Mounting on path: {}", mountPath);
             this.mount(Paths.get(mountPath), true, false, args_);
         } finally {
             this.umount();
         }
     }
-    
+
     @Override
     public int readdir(String path, Pointer buf, FuseFillDir filter, @off_t long offset, FuseFileInfo fi) {
         EgaPath p = getPath(path);
