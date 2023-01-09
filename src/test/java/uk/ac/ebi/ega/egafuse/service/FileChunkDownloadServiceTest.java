@@ -17,11 +17,8 @@
  */
 package uk.ac.ebi.ega.egafuse.service;
 
-import static okhttp3.mock.Behavior.UNORDERED;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-
-import java.io.IOException;
-
+import okhttp3.OkHttpClient;
+import okhttp3.mock.MockInterceptor;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,12 +27,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import okhttp3.OkHttpClient;
-import okhttp3.mock.MockInterceptor;
 import uk.ac.ebi.ega.egafuse.config.EgaFuseApplicationConfig;
 import uk.ac.ebi.ega.egafuse.exception.ClientProtocolException;
 import uk.ac.ebi.ega.egafuse.model.CacheKey;
+
+import java.io.IOException;
+
+import static okhttp3.mock.Behavior.UNORDERED;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 @TestPropertySource("classpath:application-test.properties")
 @ContextConfiguration(classes = EgaFuseApplicationConfig.class)
@@ -62,27 +61,33 @@ public class FileChunkDownloadServiceTest {
     public void downloadChunk_WhenGivenCacheKey_ThenReturnsFileBytes() throws ClientProtocolException, IOException {
         byte[] file = "testfiledata".getBytes();
         CacheKey cacheKey = new CacheKey(0, file.length, "EGAF00001");
-
-        String url = APP_URL.trim() + "/files/" + cacheKey.getFileId() + "?destinationFormat=plain&startCoordinate="
-                + cacheKey.getStartCoordinate() + "&endCoordinate="
-                + (cacheKey.getStartCoordinate() + cacheKey.getChunkBytesToRead());
-
-        interceptor.addRule().get(url).respond(file);
+        String url = getUrl(cacheKey);
+        String header = getRangeHeader(cacheKey);
+        interceptor.addRule().get(url).header("Range", header).respond(file);
 
         byte[] chunk = fileChunkDownloadService.downloadChunk(cacheKey);
+
         assertArrayEquals(file, chunk);
     }
 
     @Test(expected = ClientProtocolException.class)
     public void downloadChunk_WhenGivenExceptionByAppUrl_ThenThrowsException() throws IOException, ClientProtocolException {
         CacheKey cacheKey = new CacheKey(0, 12, "EGAF00001");
-
-        String url = APP_URL.trim() + "/files/" + cacheKey.getFileId() + "?destinationFormat=plain&startCoordinate="
-                + cacheKey.getStartCoordinate() + "&endCoordinate="
-                + (cacheKey.getStartCoordinate() + cacheKey.getChunkBytesToRead());
-
-        interceptor.addRule().get(url).respond(500);
+        String url = getUrl(cacheKey);
+        String rangeHeader = getRangeHeader(cacheKey);
+        interceptor.addRule().get(url).header("Range", rangeHeader).respond(500);
 
         fileChunkDownloadService.downloadChunk(cacheKey);
+    }
+
+    private String getUrl(CacheKey cacheKey) {
+        return APP_URL.trim() + "/files/" + cacheKey.getFileId() + "?destinationFormat=plain";
+    }
+
+    private static String getRangeHeader(CacheKey cacheKey) {
+        long startCoordinate = cacheKey.getStartCoordinate();
+        long endCoordinate = startCoordinate + cacheKey.getChunkBytesToRead();
+        String header = "bytes= " + startCoordinate + "-" + (endCoordinate - 1);
+        return header;
     }
 }

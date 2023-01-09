@@ -17,16 +17,20 @@
  */
 package uk.ac.ebi.ega.egafuse.model;
 
+import java.util.List;
+
 public class File {
     private String fileId;
-    private String datasetId;
+    private List<String> datasetIds;
     private String displayFileName;
     private String fileName;
     private String displayFilePath;
     private String fileStatus;
-    private String unencryptedChecksum;
-    private String unencryptedChecksumType;
+    private String plainChecksum;
+    private String plainChecksumType;
     private long fileSize;
+
+    private String indexFileId;
 
     public String getFileId() {
         return fileId;
@@ -36,12 +40,12 @@ public class File {
         this.fileId = fileId;
     }
 
-    public String getDatasetId() {
-        return datasetId;
+    public List<String> getDatasetIds() {
+        return datasetIds;
     }
 
-    public void setDatasetId(String datasetId) {
-        this.datasetId = datasetId;
+    public void setDatasetId(List<String> datasetIds) {
+        this.datasetIds = datasetIds;
     }
 
     public String getDisplayFileName() {
@@ -76,20 +80,20 @@ public class File {
         this.fileStatus = fileStatus;
     }
 
-    public String getUnencryptedChecksum() {
-        return unencryptedChecksum;
+    public String getPlainChecksum() {
+        return plainChecksum;
     }
 
-    public void setUnencryptedChecksum(String unencryptedChecksum) {
-        this.unencryptedChecksum = unencryptedChecksum;
+    public void setPlainChecksum(String plainChecksum) {
+        this.plainChecksum = plainChecksum;
     }
 
-    public String getUnencryptedChecksumType() {
-        return unencryptedChecksumType;
+    public String getPlainChecksumType() {
+        return plainChecksumType;
     }
 
-    public void setUnencryptedChecksumType(String unencryptedChecksumType) {
-        this.unencryptedChecksumType = unencryptedChecksumType;
+    public void setPlainChecksumType(String plainChecksumType) {
+        this.plainChecksumType = plainChecksumType;
     }
 
     public long getFileSize() {
@@ -100,11 +104,20 @@ public class File {
         this.fileSize = fileSize;
     }
 
+    public String getIndexFileId() {
+        return indexFileId;
+    }
+
+    public void setIndexFileId(String indexFileId) {
+        this.indexFileId = indexFileId;
+    }
+
     @Override
     public String toString() {
-        return "File [fileId=" + fileId + ", datasetId=" + datasetId + ", displayFileName=" + displayFileName
+        return "File [fileId=" + fileId + ", datasetIds=" + datasetIds.toString() + ", displayFileName=" + displayFileName
                 + ", fileName=" + fileName + ", displayFilePath=" + displayFilePath + ", fileStatus=" + fileStatus + ", unencryptedChecksum="
-                + unencryptedChecksum + ", unencryptedChecksumType=" + unencryptedChecksumType + ", fileSize="
-                + fileSize + "]";
+                + plainChecksum + ", unencryptedChecksumType=" + plainChecksumType + ", fileSize=" + fileSize
+                + ", indexFileId=" + indexFileId
+                + "]";
     }
 }
