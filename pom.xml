@@ -10,14 +10,14 @@
 
 	<groupId>uk.ac.ebi.ega</groupId>
 	<artifactId>ega-fuse-client</artifactId>
-	<version>3.0.0</version>
+	<version>3.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>ega-fuse</name>
 	<description>ega fuse client</description>
 
     <scm>
         <developerConnection>scm:git:git@github.com:EGA-archive/ega-fuse-client.git</developerConnection>
-        <tag>3.0.0</tag>
+        <tag>2.0.0</tag>
     </scm>
     
 	<properties>
